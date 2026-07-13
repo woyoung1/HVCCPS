@@ -9,8 +9,8 @@
   const CONFIG_REQUEST_FRAME_SIZE = 16;
   const CONFIG_RESPONSE_HEADER = 0xc6;
   const CONFIG_RESPONSE_BASE_SIZE = 1 + 2 + 1 + 1 + 2 + 2 + (4 * 4) + 2;
-  // sizeof(HVCCPS_Config) on the wire = 35 fields x 4 bytes (see CONFIG_FIELDS).
-  const CONFIG_RECORD_SIZE = 140;
+  // sizeof(HVCCPS_Config) on the wire = 36 fields x 4 bytes (see CONFIG_FIELDS).
+  const CONFIG_RECORD_SIZE = 144;
   // GET_SNAPSHOT response upper bound: base header + 2 records + checksums.
   const CONFIG_RESPONSE_MAX_SIZE = 320;
 
@@ -85,7 +85,10 @@
     { id: 46, key: "btnBCcMa", label: "Button B CC (mA)", type: CONFIG_VALUE_U32, group: "Buttons" },
     { id: 47, key: "btnBCvMv", label: "Button B CV (mV)", type: CONFIG_VALUE_U32, group: "Buttons" },
     { id: 48, key: "btnBCpMw", label: "Button B CP (mW)", type: CONFIG_VALUE_U32, group: "Buttons" },
-    { id: 49, key: "btnBTimeS", label: "Button B Time (s)", type: CONFIG_VALUE_U32, group: "Buttons" }
+    { id: 49, key: "btnBTimeS", label: "Button B Time (s)", type: CONFIG_VALUE_U32, group: "Buttons" },
+    // Output calibration master switch. Edited on the Calibration tab, so the
+    // group keeps it out of the Configure->Defaults grid like the Buttons set.
+    { id: 50, key: "calEnable", label: "Calibration Enable", type: CONFIG_VALUE_U32, group: "Calibration" }
   ]);
   const CONFIG_FIELD_BY_KEY = Object.freeze(Object.fromEntries(CONFIG_FIELDS.map((field) => [field.key, field])));
 
@@ -112,7 +115,8 @@
     1 + 1 + 2 +              // status_flags, key_flags, run_remaining
     (3 * 4) +                // ISR cycles last/min/max
     (SAMPLES_PER_PERIOD * 2 * 2) + // VSEC + VPRI uint16
-    (SAMPLES_PER_PERIOD * 3);      // ISEC + IPRI_AC + IPRI_DC uint8
+    (SAMPLES_PER_PERIOD * 3) +     // ISEC + IPRI_AC + IPRI_DC uint8
+    (2 * 4);                       // raw (pre-calibration) VSEC mV + ISEC mA
   const HEARTBEAT_FRAME_SIZE = 1 + 2 + HEARTBEAT_PAYLOAD_SIZE + 2;
 
   const DEFAULT_CONFIG = Object.freeze({
@@ -150,7 +154,8 @@
     btnBCcMa: 0,
     btnBCvMv: 0,
     btnBCpMw: 0,
-    btnBTimeS: 0
+    btnBTimeS: 0,
+    calEnable: 0
   });
 
   function sum8(frame, length) {
@@ -286,6 +291,8 @@
       iPriDcMa: 0,
       vPriMv: 0,
       vSecMv: 0,
+      rawVSecMv: 0,
+      rawISecMa: 0,
       aux12Mv: 0,
       aux5Mv: 0,
       vccMv: 0,
@@ -396,6 +403,8 @@
     for (let k = 0; k < SAMPLES_PER_PERIOD; k += 1) {
       latest.ipriDcSamples[k] = frame[offset++];
     }
+    latest.rawVSecMv = readLe32(frame, offset); offset += 4;
+    latest.rawISecMa = readLe32(frame, offset); offset += 4;
 
     latest.powerEnable = (latest.statusFlags & 0x01) !== 0;
     latest.controlMode = (latest.statusFlags >> 1) & 0x03;
@@ -550,6 +559,311 @@
     };
   }
 
+  // ===== Output calibration =============================================
+  // The firmware stores a dense residual grid (delta = measured - raw) and
+  // looks it up with linear/bilinear interpolation. The host compiles arbitrary
+  // user points into that grid: exact at the points, piecewise-linear between
+  // bracketing points, and a bidirectional distance-decay K(d)=1/(1+(d/R)^2)
+  // outside them so a lone point fades smoothly to zero instead of
+  // extrapolating. Layout/units/CRC mirror calibration.c exactly.
+  const CAL_REQUEST_HEADER = 0xc7;
+  const CAL_RESPONSE_HEADER = 0xc8;
+  const CAL_RESPONSE_LEN = 26;
+  const CAL_MAX_CHUNK = 128;
+
+  const CAL_OP_BEGIN = 1;
+  const CAL_OP_DATA = 2;
+  const CAL_OP_COMMIT = 3;
+  const CAL_OP_GET_INFO = 4;
+
+  const CAL_MAGIC = 0x4856434c; // "HVCL"
+  const CAL_VERSION = 1;
+  const CAL_V_POINTS = 221; // 0..2200 V, 10 V step
+  const CAL_I_POINTS = 21; //  0..200 mA, 10 mA step
+  const CAL_V_STEP_MV = 10000;
+  const CAL_I_STEP_MA = 10;
+  const CAL_V_MAX_MV = 2200000;
+  const CAL_I_MAX_MA = 200;
+  const CAL_HEADER_BYTES = 64;
+  const CAL_DI_OFFSET = CAL_HEADER_BYTES;
+  const CAL_DV_OFFSET = CAL_HEADER_BYTES + CAL_I_POINTS * 2;
+  const CAL_DATA_BYTES = CAL_I_POINTS * 2 + CAL_V_POINTS * CAL_I_POINTS * 2;
+  const CAL_IMAGE_BYTES = CAL_HEADER_BYTES + CAL_DATA_BYTES; // 9388
+  const CAL_MAX_DV_MV = 50000; // +/-50 V clamp (matches firmware)
+  const CAL_MAX_DI_MA = 50; //   +/-50 mA clamp (matches firmware)
+  const CAL_DEFAULT_RV_V = 350; // voltage decay radius (reproduces the worked example)
+  const CAL_DEFAULT_RI_MA = 50; // current decay radius
+
+  const CAL_STATUS = Object.freeze({
+    0: "OK",
+    1: "BAD LENGTH",
+    2: "BAD DIMENSIONS",
+    3: "BAD CRC",
+    4: "FLASH ERROR",
+    6: "LOCKED (output on)",
+    7: "BAD REQUEST"
+  });
+
+  // CRC32 (zlib, poly 0xEDB88320) -- byte-for-byte identical to calibration.c.
+  const CRC32_TABLE = (function () {
+    const table = new Uint32Array(256);
+    for (let n = 0; n < 256; n += 1) {
+      let c = n;
+      for (let k = 0; k < 8; k += 1) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      table[n] = c >>> 0;
+    }
+    return table;
+  })();
+
+  function crc32(bytes, start, end) {
+    let crc = 0xffffffff;
+    for (let i = start; i < end; i += 1) {
+      crc = (CRC32_TABLE[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8)) >>> 0;
+    }
+    return (crc ^ 0xffffffff) >>> 0;
+  }
+
+  function calDecayWeight(distance, radius) {
+    const r = radius > 0 ? radius : 1;
+    const t = distance / r;
+    return 1 / (1 + t * t);
+  }
+
+  // 1D residual curve over gridXs from scattered {x, d} samples: exact at the
+  // samples, linear between them, decaying outside (and around a lone sample).
+  // Samples sharing an x are averaged. No samples -> all zeros (ideal table).
+  function calBuildCurve1D(samples, gridXs, radius) {
+    const out = new Float64Array(gridXs.length);
+    if (!samples.length) return out;
+
+    const merged = [];
+    samples.slice().sort((a, b) => a.x - b.x).forEach((s) => {
+      const last = merged[merged.length - 1];
+      if (last && Math.abs(last.x - s.x) < 1e-6) { last.sum += s.d; last.n += 1; }
+      else merged.push({ x: s.x, sum: s.d, n: 1 });
+    });
+    const pts = merged.map((m) => ({ x: m.x, d: m.sum / m.n }));
+    const first = pts[0];
+    const last = pts[pts.length - 1];
+
+    for (let g = 0; g < gridXs.length; g += 1) {
+      const x = gridXs[g];
+      if (x <= first.x) {
+        out[g] = first.d * calDecayWeight(first.x - x, radius);
+      } else if (x >= last.x) {
+        out[g] = last.d * calDecayWeight(x - last.x, radius);
+      } else {
+        let lo = 0;
+        while (lo < pts.length - 1 && pts[lo + 1].x <= x) lo += 1;
+        const a = pts[lo];
+        const b = pts[lo + 1];
+        out[g] = a.d + (b.d - a.d) * ((x - a.x) / (b.x - a.x));
+      }
+    }
+    return out;
+  }
+
+  // Compile user points -> { dv: Int16Array (0.1 V), di: Int16Array (0.1 mA) }.
+  //   voltagePoints: [{ setV (V), measuredV (V), measuredI (mA)|null }]
+  //   currentPoints: [{ setI (mA), measuredI (mA) }]
+  function compileCalibration(voltagePoints, currentPoints, options = {}) {
+    const rv = Number.isFinite(options.radiusV) && options.radiusV > 0 ? options.radiusV : CAL_DEFAULT_RV_V;
+    const ri = Number.isFinite(options.radiusI) && options.radiusI > 0 ? options.radiusI : CAL_DEFAULT_RI_MA;
+
+    const vGrid = new Float64Array(CAL_V_POINTS);
+    for (let v = 0; v < CAL_V_POINTS; v += 1) vGrid[v] = (v * CAL_V_STEP_MV) / 1000;
+    const iGrid = new Float64Array(CAL_I_POINTS);
+    for (let i = 0; i < CAL_I_POINTS; i += 1) iGrid[i] = i * CAL_I_STEP_MA;
+
+    // Current grid (1D): residual = measured - set (mA).
+    const iSamples = (currentPoints || [])
+      .filter((p) => Number.isFinite(p.setI) && Number.isFinite(p.measuredI))
+      .map((p) => ({ x: p.setI, d: p.measuredI - p.setI }));
+    const iCurve = calBuildCurve1D(iSamples, iGrid, ri);
+    const di = new Int16Array(CAL_I_POINTS);
+    for (let i = 0; i < CAL_I_POINTS; i += 1) {
+      di[i] = Math.round(clampProtocolValue(iCurve[i], -CAL_MAX_DI_MA, CAL_MAX_DI_MA) * 10);
+    }
+
+    // Voltage base curve B(V): unconditional voltage points define the base.
+    // If the user only provides current-bearing points, fall back to all points
+    // so a lone point still produces a broad voltage correction. Load-coupling
+    // then appears only when there is enough information to separate it from
+    // the base (for example an unconditional point, or repeated V with
+    // different currents).
+    const vPts = (voltagePoints || []).filter((p) => Number.isFinite(p.setV) && Number.isFinite(p.measuredV));
+    const unconditional = vPts.filter((p) => !Number.isFinite(p.measuredI));
+    const baseSource = unconditional.length > 0 ? unconditional : vPts;
+    const baseSamples = baseSource.map((p) => ({ x: p.setV, d: p.measuredV - p.setV }));
+    const baseCurve = calBuildCurve1D(baseSamples, vGrid, rv);
+    const baseAt = calBuildCurve1D(baseSamples, vPts.map((p) => p.setV), rv);
+
+    // Load-coupling layer from current-bearing points: each contributes its
+    // deviation from the base, decayed in both V and I. A point that is alone at
+    // its voltage has ~zero deviation (it cannot separate load from base), so its
+    // effect stays in the base and applies across all currents.
+    const loadPts = [];
+    vPts.forEach((p, idx) => {
+      if (Number.isFinite(p.measuredI)) {
+        loadPts.push({ v: p.setV, i: p.measuredI, rel: (p.measuredV - p.setV) - baseAt[idx] });
+      }
+    });
+
+    const dv = new Int16Array(CAL_V_POINTS * CAL_I_POINTS);
+    let maxAbsV = 0;
+    for (let v = 0; v < CAL_V_POINTS; v += 1) {
+      for (let i = 0; i < CAL_I_POINTS; i += 1) {
+        let load = 0;
+        for (let p = 0; p < loadPts.length; p += 1) {
+          const lp = loadPts[p];
+          load += lp.rel * calDecayWeight(Math.abs(vGrid[v] - lp.v), rv) * calDecayWeight(Math.abs(iGrid[i] - lp.i), ri);
+        }
+        const corr = clampProtocolValue(baseCurve[v] + load, -CAL_MAX_DV_MV / 1000, CAL_MAX_DV_MV / 1000);
+        dv[v * CAL_I_POINTS + i] = Math.round(corr * 10);
+        if (Math.abs(corr) > maxAbsV) maxAbsV = Math.abs(corr);
+      }
+    }
+
+    return { dv, di, maxAbsV, vPoints: CAL_V_POINTS, iPoints: CAL_I_POINTS };
+  }
+
+  // Bilinear lookup that mirrors Calibration_ApplyVoltage (returns corrected mV).
+  function calEvalVoltage(grid, vMv, iMa) {
+    let xv = clampProtocolValue(vMv / CAL_V_STEP_MV, 0, CAL_V_POINTS - 1);
+    let xi = clampProtocolValue(iMa / CAL_I_STEP_MA, 0, CAL_I_POINTS - 1);
+    const v0 = Math.floor(xv);
+    const v1 = Math.min(v0 + 1, CAL_V_POINTS - 1);
+    const fv = xv - v0;
+    const i0 = Math.floor(xi);
+    const i1 = Math.min(i0 + 1, CAL_I_POINTS - 1);
+    const fi = xi - i0;
+    const g = grid.dv;
+    const a = g[v0 * CAL_I_POINTS + i0] + (g[v1 * CAL_I_POINTS + i0] - g[v0 * CAL_I_POINTS + i0]) * fv;
+    const b = g[v0 * CAL_I_POINTS + i1] + (g[v1 * CAL_I_POINTS + i1] - g[v0 * CAL_I_POINTS + i1]) * fv;
+    const dvMv = clampProtocolValue((a + (b - a) * fi) * 100, -CAL_MAX_DV_MV, CAL_MAX_DV_MV);
+    return vMv + dvMv;
+  }
+
+  function calEvalCurrent(grid, iMa) {
+    const x = iMa / CAL_I_STEP_MA;
+    let di;
+    if (x <= 0) di = grid.di[0];
+    else if (x >= CAL_I_POINTS - 1) di = grid.di[CAL_I_POINTS - 1];
+    else { const i0 = Math.floor(x); di = grid.di[i0] + (grid.di[i0 + 1] - grid.di[i0]) * (x - i0); }
+    return iMa + clampProtocolValue(di * 0.1, -CAL_MAX_DI_MA, CAL_MAX_DI_MA);
+  }
+
+  // Serialize a compiled grid into the 9388-byte flash image (matches calibration.c).
+  function buildCalImage(grid) {
+    const img = new Uint8Array(CAL_IMAGE_BYTES);
+    writeLe32(img, 0, CAL_MAGIC);
+    writeLe32(img, 8, CAL_VERSION);
+    writeLe32(img, 12, CAL_V_POINTS);
+    writeLe32(img, 16, CAL_I_POINTS);
+    writeLe32(img, 20, CAL_V_STEP_MV);
+    writeLe32(img, 24, CAL_I_STEP_MA);
+    writeLe32(img, 28, CAL_V_MAX_MV);
+    writeLe32(img, 32, CAL_I_MAX_MA);
+    writeLe32(img, 36, 0); // flags
+    writeLe32(img, 40, CAL_DATA_BYTES);
+    const view = new DataView(img.buffer);
+    for (let i = 0; i < CAL_I_POINTS; i += 1) view.setInt16(CAL_DI_OFFSET + i * 2, grid.di[i], true);
+    for (let k = 0; k < CAL_V_POINTS * CAL_I_POINTS; k += 1) view.setInt16(CAL_DV_OFFSET + k * 2, grid.dv[k], true);
+    writeLe32(img, 4, crc32(img, 8, CAL_IMAGE_BYTES));
+    return img;
+  }
+
+  function buildCalFrame(op, payload) {
+    const len = 4 + payload.length + 2;
+    const frame = new Uint8Array(len);
+    frame[0] = CAL_REQUEST_HEADER;
+    frame[1] = len;
+    frame[2] = op;
+    frame[3] = 0;
+    frame.set(payload, 4);
+    frame[len - 2] = sum8(frame, len - 2);
+    frame[len - 1] = xor8(frame, len - 1);
+    return frame;
+  }
+
+  function buildCalBeginFrame(totalLen, crc) {
+    const payload = new Uint8Array(8);
+    writeLe32(payload, 0, totalLen);
+    writeLe32(payload, 4, crc);
+    return buildCalFrame(CAL_OP_BEGIN, payload);
+  }
+
+  function buildCalDataFrame(offset, chunk) {
+    const payload = new Uint8Array(6 + chunk.length);
+    writeLe32(payload, 0, offset);
+    writeLe16(payload, 4, chunk.length);
+    payload.set(chunk, 6);
+    return buildCalFrame(CAL_OP_DATA, payload);
+  }
+
+  function buildCalCommitFrame() { return buildCalFrame(CAL_OP_COMMIT, new Uint8Array(0)); }
+  function buildCalGetInfoFrame() { return buildCalFrame(CAL_OP_GET_INFO, new Uint8Array(0)); }
+
+  // Split an image into the ordered frames the host streams one-at-a-time
+  // (stop-and-wait, waiting for each 0xC8 reply): [begin, data..., commit].
+  function buildCalUploadFrames(image) {
+    const frames = [buildCalBeginFrame(image.length, crc32(image, 8, image.length))];
+    for (let off = 0; off < image.length; off += CAL_MAX_CHUNK) {
+      frames.push(buildCalDataFrame(off, image.subarray(off, Math.min(off + CAL_MAX_CHUNK, image.length))));
+    }
+    frames.push(buildCalCommitFrame());
+    return frames;
+  }
+
+  function parseCalResponseFrame(frame) {
+    if (frame.length < CAL_RESPONSE_LEN) throw new Error("cal response too short");
+    if (frame[0] !== CAL_RESPONSE_HEADER) throw new Error("invalid cal response header");
+    if (frame[1] !== CAL_RESPONSE_LEN) throw new Error("invalid cal response length");
+    if (frame[CAL_RESPONSE_LEN - 2] !== sum8(frame, CAL_RESPONSE_LEN - 2) ||
+        frame[CAL_RESPONSE_LEN - 1] !== xor8(frame, CAL_RESPONSE_LEN - 1)) {
+      throw new Error("invalid cal response checksum");
+    }
+    return {
+      op: frame[2],
+      status: frame[3],
+      valid: frame[4] !== 0,
+      enable: frame[5] !== 0,
+      version: readLe32(frame, 6),
+      crc: readLe32(frame, 10),
+      vPoints: readLe16(frame, 14),
+      iPoints: readLe16(frame, 16),
+      imageLen: readLe32(frame, 18),
+      maxChunk: readLe16(frame, 22)
+    };
+  }
+
+  function createCalResponseDecoder() {
+    const rxBuffer = [];
+    return {
+      feed(value) {
+        for (const byte of value) rxBuffer.push(byte & 0xff);
+        const frames = [];
+        while (rxBuffer.length >= 2) {
+          const start = rxBuffer.indexOf(CAL_RESPONSE_HEADER);
+          if (start < 0) { rxBuffer.length = 0; return frames; }
+          if (start > 0) rxBuffer.splice(0, start);
+          if (rxBuffer.length < 2) return frames;
+          if (rxBuffer[1] !== CAL_RESPONSE_LEN) { rxBuffer.shift(); continue; }
+          if (rxBuffer.length < CAL_RESPONSE_LEN) return frames;
+          const frame = rxBuffer.slice(0, CAL_RESPONSE_LEN);
+          if (frame[CAL_RESPONSE_LEN - 2] !== sum8(frame, CAL_RESPONSE_LEN - 2) ||
+              frame[CAL_RESPONSE_LEN - 1] !== xor8(frame, CAL_RESPONSE_LEN - 1)) {
+            rxBuffer.shift(); continue;
+          }
+          frames.push(frame);
+          rxBuffer.splice(0, CAL_RESPONSE_LEN);
+        }
+        return frames;
+      },
+      reset() { rxBuffer.length = 0; }
+    };
+  }
+
   // ----- Single-cycle waveform helpers -----------------------------------
   window.HvccpsProtocol = Object.freeze({
     HEARTBEAT_HEADER,
@@ -595,6 +909,38 @@
     parseHeartbeatFrame,
     createHeartbeatDecoder,
     parseConfigResponseFrame,
-    createConfigResponseDecoder
+    createConfigResponseDecoder,
+    CAL_REQUEST_HEADER,
+    CAL_RESPONSE_HEADER,
+    CAL_RESPONSE_LEN,
+    CAL_MAX_CHUNK,
+    CAL_OP_BEGIN,
+    CAL_OP_DATA,
+    CAL_OP_COMMIT,
+    CAL_OP_GET_INFO,
+    CAL_V_POINTS,
+    CAL_I_POINTS,
+    CAL_V_STEP_MV,
+    CAL_I_STEP_MA,
+    CAL_V_MAX_MV,
+    CAL_I_MAX_MA,
+    CAL_IMAGE_BYTES,
+    CAL_MAX_DV_MV,
+    CAL_MAX_DI_MA,
+    CAL_DEFAULT_RV_V,
+    CAL_DEFAULT_RI_MA,
+    CAL_STATUS,
+    crc32,
+    compileCalibration,
+    calEvalVoltage,
+    calEvalCurrent,
+    buildCalImage,
+    buildCalBeginFrame,
+    buildCalDataFrame,
+    buildCalCommitFrame,
+    buildCalGetInfoFrame,
+    buildCalUploadFrames,
+    parseCalResponseFrame,
+    createCalResponseDecoder
   });
 })();

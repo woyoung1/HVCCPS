@@ -1124,15 +1124,280 @@ body.is-cycle-open {
   justify-self: start;
 }
 
+.calibration-connected {
+  display: grid;
+  gap: 14px;
+}
+
+.cal-status-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cal-status-row > div {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+}
+
+.cal-status-row span,
+.cal-hint {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-status-row strong {
+  overflow-wrap: anywhere;
+}
+
+.cal-status-row strong.is-enabled {
+  color: var(--ok);
+}
+
+.cal-enable-line {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+}
+
+.cal-hint {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cal-table {
+  display: grid;
+  gap: 6px;
+}
+
+.cal-table-head,
+.cal-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 1fr) minmax(112px, 1fr) minmax(128px, 1fr) 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.cal-table-head-2,
+.cal-row-i {
+  grid-template-columns: minmax(112px, 1fr) minmax(128px, 1fr) 36px;
+}
+
+.cal-table-head {
+  color: var(--muted);
+  font-size: 0.72rem;
+  padding: 0 2px;
+}
+
+.cal-rows {
+  display: grid;
+  gap: 6px;
+}
+
+.cal-row input {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  padding: 0 8px;
+}
+
+.cal-row .optional-input::placeholder {
+  color: var(--muted-2);
+}
+
+.cal-remove-button {
+  width: 34px;
+  height: 34px;
+  color: var(--muted);
+}
+
+.cal-advanced {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.cal-advanced summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.cal-advanced .inline-grid {
+  margin-top: 10px;
+}
+
+.cal-preview {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+  overflow: hidden;
+}
+
+.cal-preview-details {
+  display: grid;
+}
+
+.cal-preview-details summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.cal-preview-details summary strong {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-preview-content {
+  display: grid;
+  gap: 10px;
+  padding: 0 10px 10px;
+}
+
+.cal-preview-summary {
+  display: grid;
+  gap: 3px;
+}
+
+.cal-preview-summary span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-preview-section {
+  display: grid;
+  gap: 6px;
+}
+
+.cal-preview-section h3 {
+  margin: 0;
+  font-size: 0.76rem;
+}
+
+.cal-preview-scroll {
+  max-height: min(58vh, 620px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.cal-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  background: #fff;
+}
+
+.cal-preview-matrix {
+  min-width: 1460px;
+}
+
+.cal-preview th,
+.cal-preview td {
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.cal-preview th {
+  background: #f3f6f8;
+}
+
+.cal-delta-pos {
+  color: var(--ok);
+  background: #f0fdf4;
+}
+
+.cal-delta-neg {
+  color: var(--danger);
+  background: #fff5f5;
+}
+
+.cal-delta-zero {
+  color: var(--muted);
+}
+
+.cal-progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.cal-progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #e8edf2;
+  overflow: hidden;
+}
+
+.cal-progress-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--accent);
+  transition: width 120ms ease;
+}
+
+.cal-actions {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.cal-actions .secondary-button {
+  grid-column: 1;
+}
+
+.cal-actions .start-button {
+  grid-column: 2;
+}
+
 @media (max-width: 720px) {
   .preset-columns {
     grid-template-columns: 1fr;
+  }
+
+  .cal-status-row,
+  .cal-table-head,
+  .cal-row,
+  .cal-table-head-2,
+  .cal-row-i {
+    grid-template-columns: 1fr;
+  }
+
+  .cal-table-head {
+    display: none;
+  }
+
+  .cal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .cal-actions .secondary-button,
+  .cal-actions .start-button {
+    grid-column: 1;
   }
 }
 
 .drawer-actions {
   position: sticky;
   bottom: -16px;
+  z-index: 5;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;

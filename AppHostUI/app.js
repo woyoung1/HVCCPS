@@ -36,7 +36,28 @@ const {
   createHeartbeatDecoder,
   parseHeartbeatFrame,
   createConfigResponseDecoder,
-  parseConfigResponseFrame
+  parseConfigResponseFrame,
+  createCalResponseDecoder,
+  parseCalResponseFrame,
+  buildCalGetInfoFrame,
+  buildCalUploadFrames,
+  compileCalibration,
+  calEvalVoltage,
+  calEvalCurrent,
+  buildCalImage,
+  CAL_OP_GET_INFO,
+  CAL_IMAGE_BYTES,
+  CAL_MAX_DV_MV,
+  CAL_MAX_DI_MA,
+  CAL_DEFAULT_RV_V,
+  CAL_DEFAULT_RI_MA,
+  CAL_V_POINTS,
+  CAL_I_POINTS,
+  CAL_V_STEP_MV,
+  CAL_I_STEP_MA,
+  CAL_V_MAX_MV,
+  CAL_I_MAX_MA,
+  CAL_STATUS
 } = protocol;
 
 const CHART_WINDOW_MS = 20000;
@@ -44,6 +65,7 @@ const CHART_SAMPLE_MS = 20;
 const CHART_FRAME_MIN_MS = 1000 / 60;
 const PACKET_RATE_WINDOW_MS = 1000;
 const CONFIG_REQUEST_TIMEOUT_MS = 1800;
+const CAL_REQUEST_TIMEOUT_MS = 7000;
 const AUTO_RECONNECT_DELAY_MS = 500;
 const CHART_SELECTION_STORAGE_KEY = "g474-hvccps2-chart-selection-v1";
 const CYCLE_PREFS_STORAGE_KEY = "g474-hvccps2-cycle-prefs-v1";
@@ -54,7 +76,7 @@ const CPU_CYCLE_NS = 1e9 / CPU_CLOCK_HZ;
 const KEY_METRIC_KEYS = ["vSecV", "iSecmA", "iPriAcA", "iPriDcA", "vPriV", "cvTargetV", "ccTargetmA", "cpTargetW", "outputPowerW"];
 const DEBUG_METRIC_KEYS = new Set([
   "statusFlags", "keyFlags", "controlMode",
-  "configOk", "fixedDutyActive", "runSecondsRemaining"
+  "configOk", "fixedDutyActive", "rawVSecV", "rawISecmA", "runSecondsRemaining"
 ]);
 
 function formatSig(value, digits = 4) {
@@ -193,6 +215,8 @@ const TELEMETRY_METRICS = [
 
   { key: "configOk", label: "CONFIG OK", group: "Debug", color: "#15803d", axisLabel: "CONFIG OK", read: (l) => l.configOk ? 1 : 0, format: (l) => l.configOk ? "1" : "0" },
   { key: "fixedDutyActive", label: "FIXED DUTY", group: "Debug", color: "#a16207", axisLabel: "FIXED DUTY", read: (l) => l.fixedDutyActive ? 1 : 0, format: (l) => l.fixedDutyActive ? "1" : "0" },
+  { key: "rawVSecV", label: "RAW VSEC", group: "Debug", color: "#92400e", axisLabel: "RAW VSEC / V", read: (l) => l.rawVSecMv / 1000, format: (l) => formatVoltageMv(l.rawVSecMv) },
+  { key: "rawISecmA", label: "RAW ISEC", group: "Debug", color: "#115e59", axisLabel: "RAW ISEC / mA", read: (l) => l.rawISecMa, format: (l) => formatCurrentMa(l.rawISecMa) },
   {
     key: "runSecondsRemaining", label: "RUN LEFT", group: "Debug", color: "#6d28d9", axisLabel: "RUN LEFT / s",
     read: (l) => l.runSecondsRemaining === RUN_CONTINUOUS ? 0 : l.runSecondsRemaining,
@@ -373,12 +397,22 @@ const state = {
   latest: createLatest(),
   heartbeatDecoder: createHeartbeatDecoder(),
   configDecoder: createConfigResponseDecoder(),
+  calDecoder: createCalResponseDecoder(),
   settingsForm: cloneDefaultSettings(),
   deviceDraftConfig: null,
   deviceActiveConfig: null,
   configRequestSeq: 0,
   pendingConfigOp: null,
   pendingConfigAt: 0,
+  pendingCalOp: null,
+  pendingCalAt: 0,
+  calInfo: null,
+  calVoltagePoints: [],
+  calCurrentPoints: [],
+  compiledCal: null,
+  compiledCalImage: null,
+  calUploadBusy: false,
+  calProgress: { done: 0, total: 0, label: "" },
   selectedChartMetrics: loadChartSelection(),
   chartSignalQuery: "",
   chartSignalsOpen: false,
@@ -549,6 +583,29 @@ function updateSystemUi() {
     ui.savePresetsButton.disabled = !connected || running || state.pendingConfigOp !== null;
     ui.presetRunAButton.disabled = !connected || running;
     ui.presetRunBButton.disabled = !connected || running;
+  }
+
+  if (ui.calibrationConnected) {
+    ui.calibrationDisconnected.hidden = connected;
+    ui.calibrationConnected.hidden = !connected;
+    ui.calibrationLiveBanner.hidden = !running;
+    ui.calibrationDrawerState.textContent = state.calUploadBusy
+      ? "UPLOAD BUSY"
+      : running ? `${runText} / ${ui.outputMeta.textContent}`
+        : connected ? (state.calInfo && state.calInfo.valid ? "TABLE VALID" : "TABLE EMPTY")
+          : "DISCONNECTED";
+    refreshCalibrationStatus();
+    const calLocked = !connected || running || state.calUploadBusy || state.pendingConfigOp !== null || state.pendingCalOp !== null;
+    ui.calEnableToggle.disabled = !connected || running || state.calUploadBusy || state.pendingConfigOp !== null || state.pendingCalOp !== null;
+    ui.calCompileButton.disabled = !connected || state.calUploadBusy;
+    ui.calWriteButton.disabled = calLocked;
+    ui.calAddVoltageButton.disabled = !connected || running || state.calUploadBusy;
+    ui.calAddCurrentButton.disabled = !connected || running || state.calUploadBusy;
+    for (const input of ui.calibrationConnected.querySelectorAll("input, button")) {
+      if (input === ui.calEnableToggle || input === ui.calCompileButton || input === ui.calWriteButton ||
+          input === ui.calAddVoltageButton || input === ui.calAddCurrentButton) continue;
+      if (input.closest(".cal-rows") || input.closest(".cal-advanced")) input.disabled = running || state.calUploadBusy;
+    }
   }
 
   setChip(ui.powerStateChip, latest.powerEnable ? "LATCH ON" : "LATCH OFF", latest.powerEnable ? "is-danger" : "");
@@ -1082,6 +1139,10 @@ function configStatusText(status) {
   return CONFIG_STATUS[status] || `STATUS ${status}`;
 }
 
+function calStatusText(status) {
+  return CAL_STATUS[status] || `STATUS ${status}`;
+}
+
 async function sendConfigRequest(op, options = {}) {
   if (!state.connected) throw new Error("Serial not connected.");
   if (state.pendingConfigOp) throw new Error("Another config request is pending.");
@@ -1155,6 +1216,73 @@ function handleConfigResponse(frame) {
   state.pendingConfigOp = null;
   if (response.status === 0 && response.op === CONFIG_OP_GET_SNAPSHOT) applyConfigSnapshot(response);
   pending.resolve(response);
+}
+
+function handleCalResponse(frame) {
+  let response;
+  try {
+    response = parseCalResponseFrame(frame);
+  } catch (error) {
+    logError("CAL RESPONSE PARSE FAILED", error);
+    return;
+  }
+  state.calInfo = response;
+  refreshCalibrationStatus();
+  if (!state.pendingCalOp || state.pendingCalOp.op !== response.op) return;
+  window.clearTimeout(state.pendingCalOp.timeout);
+  const pending = state.pendingCalOp;
+  state.pendingCalOp = null;
+  pending.resolve(response);
+  updateSystemUi();
+}
+
+async function sendCalFrameRequest(frame, label = "calibration") {
+  if (!state.connected) throw new Error("Serial not connected.");
+  if (state.pendingCalOp) throw new Error("Another calibration request is pending.");
+  if (state.pendingConfigOp) throw new Error("Configuration request is pending.");
+
+  const op = frame[2];
+  const promise = new Promise((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      if (state.pendingCalOp && state.pendingCalOp.op === op) {
+        state.pendingCalOp = null;
+        reject(new Error(`${label} response timeout.`));
+      }
+    }, CAL_REQUEST_TIMEOUT_MS);
+    state.pendingCalOp = { op, resolve, reject, timeout };
+    state.pendingCalAt = performance.now();
+  });
+
+  try {
+    await sendFrame(frame);
+    return await promise;
+  } catch (error) {
+    if (state.pendingCalOp && state.pendingCalOp.op === op) {
+      window.clearTimeout(state.pendingCalOp.timeout);
+      state.pendingCalOp = null;
+    }
+    throw error;
+  }
+}
+
+async function syncDeviceAfterConnect() {
+  await requestConfigSnapshot(true);
+  await requestCalInfo(false);
+}
+
+async function requestCalInfo(showMessage = false) {
+  if (!state.connected) return null;
+  try {
+    const response = await sendCalFrameRequest(buildCalGetInfoFrame(), "calibration info");
+    if (response.status !== 0) throw new Error(calStatusText(response.status));
+    state.calInfo = response;
+    if (showMessage) setMessage("CALIBRATION TABLE INFO SYNCED");
+    updateSystemUi();
+    return response;
+  } catch (error) {
+    setMessage(`CAL INFO FAILED: ${error.message}`, true, error);
+    return null;
+  }
 }
 
 function resetCurrentRunSummary(stats, startedAt = 0) {
@@ -1352,6 +1480,8 @@ function feedRx(value) {
   }
   const configFrames = state.configDecoder.feed(value);
   for (const frame of configFrames) handleConfigResponse(frame);
+  const calFrames = state.calDecoder.feed(value);
+  for (const frame of calFrames) handleCalResponse(frame);
 }
 
 function clearReconnectTimer() {
@@ -1386,12 +1516,19 @@ async function finalizeDisconnect(message, shouldReconnect = false) {
   if (!shouldReconnect) state.disconnectRequested = false;
   state.heartbeatDecoder.reset();
   state.configDecoder.reset();
+  state.calDecoder.reset();
   state.packetCounter = 0;
   state.packetRate = 0;
   state.latest = createLatest();
   state.deviceDraftConfig = null;
   state.deviceActiveConfig = null;
+  if (state.pendingConfigOp) window.clearTimeout(state.pendingConfigOp.timeout);
   state.pendingConfigOp = null;
+  if (state.pendingCalOp) window.clearTimeout(state.pendingCalOp.timeout);
+  state.pendingCalOp = null;
+  state.calInfo = null;
+  state.calUploadBusy = false;
+  state.calProgress = { done: 0, total: 0, label: "" };
   if (state.runSummaryStats.currentActive) finishRunSummary(performance.now());
   resetChartHistory();
   try {
@@ -1476,11 +1613,12 @@ async function connectSerial() {
     state.reconnectAttempt = 0;
     state.heartbeatDecoder.reset();
     state.configDecoder.reset();
+    state.calDecoder.reset();
     resetChartHistory();
     state.readTask = readLoop();
     setMessage("CONNECTED");
     updateSystemUi();
-    requestConfigSnapshot(true);
+    void syncDeviceAfterConnect();
   } catch (error) {
     state.connected = false;
     state.port = null;
@@ -1618,6 +1756,287 @@ async function sendDisableCommand() {
     setMessage("DISABLE COMMAND SENT");
   } catch (error) {
     setMessage(`SEND FAILED: ${error.message}`, true, error);
+  }
+}
+
+// ----- Output calibration ------------------------------------------------
+
+function refreshCalibrationStatus() {
+  if (!ui.calStatusTable) return;
+  const info = state.calInfo;
+  const activeCfg = state.deviceActiveConfig || state.deviceDraftConfig || state.settingsForm;
+  const enabled = info ? info.enable : Number(activeCfg.calEnable) !== 0;
+  ui.calStatusTable.textContent = info
+    ? info.valid ? `${info.vPoints} x ${info.iPoints}` : "NO VALID TABLE"
+    : "--";
+  ui.calStatusCrc.textContent = info && info.valid ? `0x${info.crc.toString(16).padStart(8, "0")}` : "--";
+  ui.calStatusApplied.textContent = enabled ? "ENABLED" : "DISABLED";
+  ui.calStatusApplied.classList.toggle("is-enabled", enabled);
+  if (ui.calEnableToggle) ui.calEnableToggle.checked = enabled;
+  ui.calProgress.hidden = !state.calUploadBusy && state.calProgress.done === 0;
+  if (state.calProgress.total > 0) {
+    const pct = Math.max(0, Math.min(100, (state.calProgress.done / state.calProgress.total) * 100));
+    ui.calProgressBar.style.width = `${pct.toFixed(1)}%`;
+    ui.calProgressText.textContent = `${state.calProgress.label} ${Math.round(pct)}%`;
+  }
+}
+
+function createCalNumberInput(value, placeholder, step = "0.1") {
+  const input = document.createElement("input");
+  input.type = "number";
+  input.step = step;
+  input.placeholder = placeholder;
+  if (value !== null && value !== undefined && value !== "") input.value = value;
+  input.addEventListener("input", () => {
+    state.compiledCal = null;
+    state.compiledCalImage = null;
+    refreshCalibrationValidation();
+  });
+  return input;
+}
+
+function addCalibrationVoltageRow(point = {}) {
+  const row = document.createElement("div");
+  row.className = "cal-row cal-row-v";
+  const setV = createCalNumberInput(point.setV ?? "", "500");
+  const measuredV = createCalNumberInput(point.measuredV ?? "", "509");
+  const measuredI = createCalNumberInput(point.measuredI ?? "", "optional");
+  measuredI.classList.add("optional-input");
+  const remove = document.createElement("button");
+  remove.className = "icon-button cal-remove-button";
+  remove.type = "button";
+  remove.title = "Remove point";
+  remove.setAttribute("aria-label", "Remove voltage point");
+  remove.textContent = "x";
+  remove.addEventListener("click", () => {
+    row.remove();
+    state.compiledCal = null;
+    state.compiledCalImage = null;
+    refreshCalibrationValidation();
+  });
+  row.append(setV, measuredV, measuredI, remove);
+  ui.calVoltageRows.append(row);
+  refreshCalibrationValidation();
+}
+
+function addCalibrationCurrentRow(point = {}) {
+  const row = document.createElement("div");
+  row.className = "cal-row cal-row-i";
+  const setI = createCalNumberInput(point.setI ?? "", "100");
+  const measuredI = createCalNumberInput(point.measuredI ?? "", "102");
+  const remove = document.createElement("button");
+  remove.className = "icon-button cal-remove-button";
+  remove.type = "button";
+  remove.title = "Remove point";
+  remove.setAttribute("aria-label", "Remove current point");
+  remove.textContent = "x";
+  remove.addEventListener("click", () => {
+    row.remove();
+    state.compiledCal = null;
+    state.compiledCalImage = null;
+    refreshCalibrationValidation();
+  });
+  row.append(setI, measuredI, remove);
+  ui.calCurrentRows.append(row);
+  refreshCalibrationValidation();
+}
+
+function readCalibrationPoints() {
+  const errors = [];
+  const voltagePoints = [];
+  const currentPoints = [];
+  for (const [index, row] of Array.from(ui.calVoltageRows.children).entries()) {
+    const inputs = row.querySelectorAll("input");
+    if (!inputs[0].value.trim() && !inputs[1].value.trim() && !inputs[2].value.trim()) continue;
+    const setV = Number.parseFloat(inputs[0].value);
+    const measuredV = Number.parseFloat(inputs[1].value);
+    const measuredIText = inputs[2].value.trim();
+    const measuredI = measuredIText === "" ? null : Number.parseFloat(measuredIText);
+    if (!Number.isFinite(setV) || setV < 0 || setV > CAL_V_MAX_MV / 1000) errors.push(`Voltage row ${index + 1}: RAW VSEC 0..${CAL_V_MAX_MV / 1000} V`);
+    if (!Number.isFinite(measuredV) || measuredV < 0 || measuredV > (CAL_V_MAX_MV + CAL_MAX_DV_MV) / 1000) errors.push(`Voltage row ${index + 1}: measured V invalid`);
+    if (measuredIText !== "" && (!Number.isFinite(measuredI) || measuredI < 0 || measuredI > CAL_I_MAX_MA)) errors.push(`Voltage row ${index + 1}: measured I 0..${CAL_I_MAX_MA} mA`);
+    if (Number.isFinite(setV) && Number.isFinite(measuredV)) voltagePoints.push({ setV, measuredV, measuredI });
+  }
+  for (const [index, row] of Array.from(ui.calCurrentRows.children).entries()) {
+    const inputs = row.querySelectorAll("input");
+    if (!inputs[0].value.trim() && !inputs[1].value.trim()) continue;
+    const setI = Number.parseFloat(inputs[0].value);
+    const measuredI = Number.parseFloat(inputs[1].value);
+    if (!Number.isFinite(setI) || setI < 0 || setI > CAL_I_MAX_MA) errors.push(`Current row ${index + 1}: RAW ISEC 0..${CAL_I_MAX_MA} mA`);
+    if (!Number.isFinite(measuredI) || measuredI < 0 || measuredI > CAL_I_MAX_MA + CAL_MAX_DI_MA) errors.push(`Current row ${index + 1}: measured I invalid`);
+    if (Number.isFinite(setI) && Number.isFinite(measuredI)) currentPoints.push({ setI, measuredI });
+  }
+  const radiusV = Number.parseFloat(ui.calRadiusVInput.value);
+  const radiusI = Number.parseFloat(ui.calRadiusIInput.value);
+  if (!Number.isFinite(radiusV) || radiusV < 10) errors.push("Voltage decay radius must be >= 10 V");
+  if (!Number.isFinite(radiusI) || radiusI < 5) errors.push("Current decay radius must be >= 5 mA");
+  return { voltagePoints, currentPoints, radiusV, radiusI, errors };
+}
+
+function refreshCalibrationValidation() {
+  if (!ui.calibrationValidation) return false;
+  const form = readCalibrationPoints();
+  if (form.errors.length > 0) {
+    ui.calibrationValidation.textContent = form.errors.slice(0, 3).join(" / ");
+    ui.calibrationValidation.hidden = false;
+    ui.calibrationValidation.className = "validation-line error";
+    return false;
+  }
+  ui.calibrationValidation.hidden = true;
+  return true;
+}
+
+function formatSignedCalValue(value, unit) {
+  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
+  return `${sign}${formatSig(Math.abs(value))} ${unit}`;
+}
+
+function calDeltaClass(value, deadband) {
+  if (Math.abs(value) <= deadband) return "cal-delta-zero";
+  return value > 0 ? "cal-delta-pos" : "cal-delta-neg";
+}
+
+function renderCalibrationPreview(grid, voltagePoints, currentPoints) {
+  const voltageHeader = Array.from({ length: CAL_I_POINTS }, (_, i) => `<th>${formatSig(i * CAL_I_STEP_MA)} mA</th>`).join("");
+  const voltageRows = Array.from({ length: CAL_V_POINTS }, (_, vIndex) => {
+    const rawV = (vIndex * CAL_V_STEP_MV) / 1000;
+    const cells = Array.from({ length: CAL_I_POINTS }, (_, iIndex) => {
+      const dV = grid.dv[vIndex * CAL_I_POINTS + iIndex] * 0.1;
+      return `<td class="${calDeltaClass(dV, 0.05)}">${formatSignedCalValue(dV, "V")}</td>`;
+    }).join("");
+    return `<tr><th>${formatSig(rawV)} V</th>${cells}</tr>`;
+  }).join("");
+  const currentRows = Array.from({ length: CAL_I_POINTS }, (_, iIndex) => {
+    const rawI = iIndex * CAL_I_STEP_MA;
+    const dI = grid.di[iIndex] * 0.1;
+    const calI = rawI + dI;
+    return `<tr><td>${formatSig(rawI)} mA</td><td>${formatSig(calI)} mA</td><td class="${calDeltaClass(dI, 0.05)}">${formatSignedCalValue(dI, "mA")}</td></tr>`;
+  }).join("");
+  const rawV = Number.isFinite(state.latest.rawVSecMv) ? state.latest.rawVSecMv : state.latest.vSecMv;
+  const rawI = Number.isFinite(state.latest.rawISecMa) ? state.latest.rawISecMa : state.latest.iSecMa;
+  const liveI = calEvalCurrent(grid, rawI);
+  const liveV = calEvalVoltage(grid, rawV, liveI);
+  ui.calPreview.innerHTML = `
+    <details class="cal-preview-details" open>
+      <summary>
+        <span>Compiled table preview</span>
+        <strong>${voltagePoints.length} voltage points / ${currentPoints.length} current points</strong>
+      </summary>
+      <div class="cal-preview-content">
+        <div class="cal-preview-summary">
+          <span>image ${CAL_IMAGE_BYTES} B / full voltage table ${CAL_V_POINTS} x ${CAL_I_POINTS}, ${formatSig(CAL_V_STEP_MV / 1000)} V x ${formatSig(CAL_I_STEP_MA)} mA cells</span>
+          <span>showing every compiled dV cell / max |dV| ${formatSig(grid.maxAbsV)} V</span>
+          <span>live raw ${formatVoltageMv(rawV)}, ${formatCurrentMa(rawI)} -> ${formatVoltageMv(liveV)}, ${formatCurrentMa(liveI)}</span>
+        </div>
+        <div class="cal-preview-section">
+          <h3>Full voltage dV table</h3>
+          <div class="cal-preview-scroll">
+            <table class="cal-preview-matrix">
+              <thead><tr><th>RAW V / corrected I axis</th>${voltageHeader}</tr></thead>
+              <tbody>${voltageRows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div class="cal-preview-section">
+          <h3>Full current dI table</h3>
+          <table>
+            <thead><tr><th>RAW ISEC</th><th>Cal ISEC</th><th>dI</th></tr></thead>
+            <tbody>${currentRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </details>`;
+  ui.calPreview.hidden = false;
+}
+
+function compileCalibrationFromUi(showMessage = true) {
+  const form = readCalibrationPoints();
+  if (form.errors.length > 0) {
+    refreshCalibrationValidation();
+    throw new Error(form.errors[0]);
+  }
+  const grid = compileCalibration(form.voltagePoints, form.currentPoints, {
+    radiusV: form.radiusV || CAL_DEFAULT_RV_V,
+    radiusI: form.radiusI || CAL_DEFAULT_RI_MA
+  });
+  const image = buildCalImage(grid);
+  state.compiledCal = grid;
+  state.compiledCalImage = image;
+  renderCalibrationPreview(grid, form.voltagePoints, form.currentPoints);
+  if (showMessage) setMessage("CALIBRATION TABLE COMPILED");
+  return { grid, image };
+}
+
+async function sendCalibrationEnable(enable) {
+  if (!state.connected) {
+    setMessage("CONNECT FIRST", true);
+    return;
+  }
+  if (state.latest.powerEnable) {
+    setMessage("DISABLE OUTPUT BEFORE CHANGING CALIBRATION", true);
+    refreshCalibrationStatus();
+    return;
+  }
+  try {
+    const value = enable ? 1 : 0;
+    if (state.pendingCalOp) throw new Error("Another calibration request is pending.");
+    const setResponse = await sendConfigRequest(CONFIG_OP_SET_FIELD, { field: "calEnable", value });
+    if (setResponse.status !== 0) throw new Error(`calEnable: ${configStatusText(setResponse.status)}`);
+    const applyResponse = await sendConfigRequest(CONFIG_OP_APPLY_DRAFT);
+    if (applyResponse.status !== 0) throw new Error(configStatusText(applyResponse.status));
+    const saveResponse = await sendConfigRequest(CONFIG_OP_SAVE_DRAFT);
+    if (saveResponse.status !== 0) throw new Error(configStatusText(saveResponse.status));
+    await requestConfigSnapshot(false);
+    await requestCalInfo(false);
+    setMessage(enable ? "CALIBRATION ENABLED AND SAVED" : "CALIBRATION DISABLED AND SAVED");
+  } catch (error) {
+    setMessage(`CALIBRATION ENABLE FAILED: ${error.message}`, true, error);
+    refreshCalibrationStatus();
+  }
+}
+
+async function uploadCalibrationImage(image) {
+  const frames = buildCalUploadFrames(image);
+  state.calUploadBusy = true;
+  state.calProgress = { done: 0, total: frames.length, label: "upload" };
+  updateSystemUi();
+  try {
+    for (let i = 0; i < frames.length; i += 1) {
+      state.calProgress = { done: i, total: frames.length, label: i === 0 ? "begin" : i === frames.length - 1 ? "commit" : "data" };
+      refreshCalibrationStatus();
+      const response = await sendCalFrameRequest(frames[i], "calibration upload");
+      if (response.status !== 0) throw new Error(`${state.calProgress.label}: ${calStatusText(response.status)}`);
+    }
+    state.calProgress = { done: frames.length, total: frames.length, label: "done" };
+    refreshCalibrationStatus();
+    await requestCalInfo(false);
+    setMessage("CALIBRATION TABLE WRITTEN TO FLASH");
+  } finally {
+    state.calUploadBusy = false;
+    window.setTimeout(() => {
+      if (!state.calUploadBusy) {
+        state.calProgress = { done: 0, total: 0, label: "" };
+        refreshCalibrationStatus();
+      }
+    }, 900);
+    updateSystemUi();
+  }
+}
+
+async function sendWriteCalibration() {
+  if (!state.connected) {
+    setMessage("CONNECT FIRST", true);
+    return;
+  }
+  if (state.latest.powerEnable) {
+    setMessage("DISABLE OUTPUT BEFORE WRITING CALIBRATION", true);
+    return;
+  }
+  try {
+    const compiled = state.compiledCalImage ? { image: state.compiledCalImage } : compileCalibrationFromUi(false);
+    await uploadCalibrationImage(compiled.image);
+  } catch (error) {
+    setMessage(`CALIBRATION WRITE FAILED: ${error.message}`, true, error);
   }
 }
 
@@ -1765,7 +2184,8 @@ function openDrawer(name) {
     connect: ui.connectDrawer,
     run: ui.runDrawer,
     configure: ui.configureDrawer,
-    presets: ui.presetsDrawer
+    presets: ui.presetsDrawer,
+    calibration: ui.calibrationDrawer
   };
   for (const [key, drawer] of Object.entries(drawerMap)) {
     const open = key === name;
@@ -1781,10 +2201,12 @@ function closeDrawer() {
   ui.runDrawer.hidden = true;
   ui.configureDrawer.hidden = true;
   ui.presetsDrawer.hidden = true;
+  ui.calibrationDrawer.hidden = true;
   ui.connectDrawer.setAttribute("aria-hidden", "true");
   ui.runDrawer.setAttribute("aria-hidden", "true");
   ui.configureDrawer.setAttribute("aria-hidden", "true");
   ui.presetsDrawer.setAttribute("aria-hidden", "true");
+  ui.calibrationDrawer.setAttribute("aria-hidden", "true");
   state.activeDrawer = null;
   ui.drawerBackdrop.hidden = true;
 }
@@ -1954,7 +2376,7 @@ function bindConfigInputs() {
     for (const field of CONFIG_FIELDS) {
       // Per-key presets are edited in the dedicated Presets drawer, never in the
       // device-constant Configure->Defaults grid.
-      if (ui.configInputs[field.key] || field.group === "Buttons") continue;
+      if (ui.configInputs[field.key] || field.group === "Buttons" || field.group === "Calibration") continue;
       const label = document.createElement("label");
       label.className = "field";
       const span = document.createElement("span");
@@ -2403,6 +2825,31 @@ function bindUi() {
   ui.presetBContinuous = document.getElementById("presetBContinuous");
   ui.presetRunBButton = document.getElementById("presetRunBButton");
 
+  ui.openCalibrationButton = document.getElementById("openCalibrationButton");
+  ui.calibrationDrawer = document.getElementById("calibrationDrawer");
+  ui.calibrationDrawerState = document.getElementById("calibrationDrawerState");
+  ui.calibrationDisconnected = document.getElementById("calibrationDisconnected");
+  ui.calibrationOpenConnectButton = document.getElementById("calibrationOpenConnectButton");
+  ui.calibrationConnected = document.getElementById("calibrationConnected");
+  ui.calibrationLiveBanner = document.getElementById("calibrationLiveBanner");
+  ui.calStatusTable = document.getElementById("calStatusTable");
+  ui.calStatusCrc = document.getElementById("calStatusCrc");
+  ui.calStatusApplied = document.getElementById("calStatusApplied");
+  ui.calEnableToggle = document.getElementById("calEnableToggle");
+  ui.calVoltageRows = document.getElementById("calVoltageRows");
+  ui.calCurrentRows = document.getElementById("calCurrentRows");
+  ui.calAddVoltageButton = document.getElementById("calAddVoltageButton");
+  ui.calAddCurrentButton = document.getElementById("calAddCurrentButton");
+  ui.calRadiusVInput = document.getElementById("calRadiusVInput");
+  ui.calRadiusIInput = document.getElementById("calRadiusIInput");
+  ui.calPreview = document.getElementById("calPreview");
+  ui.calibrationValidation = document.getElementById("calibrationValidation");
+  ui.calCompileButton = document.getElementById("calCompileButton");
+  ui.calWriteButton = document.getElementById("calWriteButton");
+  ui.calProgress = document.getElementById("calProgress");
+  ui.calProgressBar = document.getElementById("calProgressBar");
+  ui.calProgressText = document.getElementById("calProgressText");
+
   ui.toastStack = document.getElementById("toastStack");
 
   ui.openConnectButton.addEventListener("click", () => openDrawer("connect"));
@@ -2411,6 +2858,10 @@ function bindUi() {
   ui.outputPill.addEventListener("click", () => openDrawer("run"));
   ui.openConfigureButton.addEventListener("click", () => openDrawer("configure"));
   ui.openPresetsButton.addEventListener("click", () => openDrawer("presets"));
+  ui.openCalibrationButton.addEventListener("click", () => {
+    openDrawer("calibration");
+    if (state.connected) requestCalInfo(false);
+  });
   if (ui.openCycleButton) ui.openCycleButton.addEventListener("click", openCycleOverlay);
   if (ui.cycleCloseButton) ui.cycleCloseButton.addEventListener("click", closeCycleOverlay);
   if (ui.debugPanelToggle) ui.debugPanelToggle.addEventListener("click", () => setDebugPanelOpen(!state.debugPanelOpen));
@@ -2470,6 +2921,26 @@ function bindUi() {
     el.addEventListener("change", updatePresetFormVisibility);
   });
 
+  ui.calibrationOpenConnectButton.addEventListener("click", () => openDrawer("connect"));
+  ui.calAddVoltageButton.addEventListener("click", () => addCalibrationVoltageRow());
+  ui.calAddCurrentButton.addEventListener("click", () => addCalibrationCurrentRow());
+  ui.calCompileButton.addEventListener("click", () => {
+    try {
+      compileCalibrationFromUi(true);
+    } catch (error) {
+      setMessage(`CALIBRATION COMPILE FAILED: ${error.message}`, true, error);
+    }
+  });
+  ui.calWriteButton.addEventListener("click", sendWriteCalibration);
+  ui.calEnableToggle.addEventListener("change", () => sendCalibrationEnable(ui.calEnableToggle.checked));
+  [ui.calRadiusVInput, ui.calRadiusIInput].forEach((el) => {
+    el.addEventListener("input", () => {
+      state.compiledCal = null;
+      state.compiledCalImage = null;
+      refreshCalibrationValidation();
+    });
+  });
+
   [ui.setVoltageInput, ui.setCurrentInput, ui.setPowerInput, ui.runSecondsInput, ui.continuousCheckbox, ui.startModeRegular, ui.startModeFixed, ui.fixedDutyInput].forEach((input) => {
     input.addEventListener("input", () => {
       updateRunFormVisibility();
@@ -2516,12 +2987,15 @@ function boot() {
   buildCycleSignalControls();
   buildCycleOptions();
   writeSettingsForm(state.settingsForm);
+  addCalibrationVoltageRow();
+  addCalibrationCurrentRow();
   buildChartPicker();
   renderTelemetryCards();
   updateChartSelectionUi();
   refreshSettingsReadouts();
   updateRunFormVisibility();
   updatePresetFormVisibility();
+  refreshCalibrationStatus();
   buildChart();
   setDebugPanelOpen(false);
 

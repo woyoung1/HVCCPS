@@ -63,6 +63,10 @@
         <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="4" width="6" height="12" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="11" y="4" width="6" height="12" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 13V7M14 13v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <span>Presets</span>
       </button>
+      <button class="tool-button" id="openCalibrationButton" type="button" title="Output calibration">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15 15 3l2 2L5 17zM12 6l2 2M3 15v2h2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Calibrate</span>
+      </button>
       <button class="icon-button" id="undoButton" type="button" title="Undo (Ctrl+Z)" aria-label="Undo" disabled>
         <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M8 6 4 10l4 4M4 10h8a4 4 0 0 1 4 4v1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -490,6 +494,91 @@
 
         <div class="drawer-actions">
           <button id="savePresetsButton" class="start-button" type="button">Save Presets to Flash</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <aside class="drawer drawer-wide" id="calibrationDrawer" hidden aria-hidden="true" aria-labelledby="calibrationTitle">
+    <header class="drawer-head">
+      <div>
+        <h2 id="calibrationTitle">Output Calibration</h2>
+        <span id="calibrationDrawerState">TABLE UNKNOWN</span>
+      </div>
+      <button class="icon-button" type="button" data-drawer-close aria-label="Close calibration panel">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+    <div class="drawer-body">
+      <div class="empty-state" id="calibrationDisconnected" hidden>
+        <strong>Serial link required</strong>
+        <button class="primary-button" id="calibrationOpenConnectButton" type="button">Open Serial Link</button>
+      </div>
+
+      <div class="calibration-connected" id="calibrationConnected" hidden>
+        <p class="presets-intro">
+          Enter the uncalibrated RAW value reported by the device and the value an external meter measured.
+          The host compiles a residual table (exact at your points, linear between them, smoothly decaying
+          to zero outside) and streams it to a dedicated flash region. Corrections are clamped to
+          &plusmn;50&nbsp;V / &plusmn;50&nbsp;mA in firmware. Writing and enabling calibration touch flash, so the
+          output must be off.
+        </p>
+        <div class="warn-block cal-raw-note">
+          Collect points with Apply calibration OFF. Use RAW VSEC / RAW ISEC as the input columns, then enter
+          the external meter readings in the measured columns.
+        </div>
+        <div class="live-note" id="calibrationLiveBanner" hidden>OUTPUT LIVE: calibration is locked while the output is running.</div>
+
+        <div class="cal-status-row">
+          <div><span>Device table</span><strong id="calStatusTable">--</strong></div>
+          <div><span>CRC</span><strong id="calStatusCrc">--</strong></div>
+          <div><span>Applied</span><strong id="calStatusApplied">--</strong></div>
+        </div>
+
+        <label class="check-line cal-enable-line">
+          <input id="calEnableToggle" type="checkbox">
+          <span>Apply calibration to the control loop (saved to config flash)</span>
+        </label>
+
+        <fieldset class="form-group">
+          <legend>Voltage points</legend>
+          <p class="cal-hint">RAW VSEC, meter V, and optionally meter current (mA) for load-dependent correction.</p>
+          <div class="cal-table">
+            <div class="cal-table-head"><span>RAW VSEC (V)</span><span>Meter V</span><span>Meter I (mA, opt)</span><span></span></div>
+            <div class="cal-rows" id="calVoltageRows"></div>
+          </div>
+          <button class="small-button" id="calAddVoltageButton" type="button">+ Add voltage point</button>
+        </fieldset>
+
+        <fieldset class="form-group">
+          <legend>Current points</legend>
+          <p class="cal-hint">RAW ISEC (mA) and meter I (mA), collected while calibration is disabled.</p>
+          <div class="cal-table">
+            <div class="cal-table-head cal-table-head-2"><span>RAW ISEC (mA)</span><span>Meter I (mA)</span><span></span></div>
+            <div class="cal-rows" id="calCurrentRows"></div>
+          </div>
+          <button class="small-button" id="calAddCurrentButton" type="button">+ Add current point</button>
+        </fieldset>
+
+        <details class="cal-advanced">
+          <summary>Advanced: decay radius</summary>
+          <div class="inline-grid">
+            <label class="field"><span>Voltage R (V)</span><input id="calRadiusVInput" type="number" min="10" step="10" value="350"></label>
+            <label class="field"><span>Current R (mA)</span><input id="calRadiusIInput" type="number" min="5" step="5" value="50"></label>
+          </div>
+          <p class="cal-hint">A lone point fades to zero roughly R away from it. Larger R spreads each correction further.</p>
+        </details>
+
+        <div class="cal-preview" id="calPreview" hidden></div>
+        <div class="validation-line" id="calibrationValidation" hidden></div>
+
+        <div class="drawer-actions cal-actions">
+          <button id="calCompileButton" class="secondary-button" type="button">Compile &amp; Preview</button>
+          <button id="calWriteButton" class="start-button" type="button">Write Table to Flash</button>
+        </div>
+        <div class="cal-progress" id="calProgress" hidden>
+          <div class="cal-progress-track"><div class="cal-progress-bar" id="calProgressBar"></div></div>
+          <span id="calProgressText"></span>
         </div>
       </div>
     </div>
