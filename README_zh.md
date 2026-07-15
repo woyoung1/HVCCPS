@@ -1,5 +1,9 @@
 ﻿# HVCCPS V1.4
 
+<div align="right">
+  <a href="README.md">English</a> | <strong>简体中文</strong>
+</div>
+
 [![Bilibili followers](https://img.shields.io/badge/dynamic/json?color=blue&label=BiliBili&labelColor=white&query=$.data.follower&url=https://api.bilibili.com/x/relation/stat?vmid=1084866085&logo=bilibili)](https://space.bilibili.com/1084866085)
 [![YouTube](https://img.shields.io/badge/YouTube-white?logo=youtube&logoColor=FF0000)](https://www.youtube.com/@lyyontop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/AzidoPP/HVCCPS-V1.4?color=yellow&logo=github&labelColor=black&label=Latest)](https://github.com/AzidoPP/HVCCPS-V1.4)
@@ -12,7 +16,7 @@
 > [!CAUTION]
 > 本项目涉及致命高压。设备断电后，输出端及电容仍可能储存大量能量。调试和使用前，请确保绝缘保护措施齐备；请勿在缺乏高压操作经验或无人监护的情况下使用。
 
-![HVCCPS V1.4 封面](Docs/封面.png)
+![HVCCPS V1.4 封面](Docs/cover-zh.png)
 
 ## 1. 项目简介
 
@@ -45,7 +49,7 @@ PCB 使用 EasyEDA（立创 EDA 专业版）设计，仓库提供完整的 [Easy
 | 输出功率（DC） | 0 | 可调 | 400 | W | — |
 | 开关频率 | 11 | 35 | 45 | kHz | 默认自动变频，35 kHz 为基准频率 |
 | 栅极驱动死区 | — | 200 | — | ns | — |
-| 变换效率 | — | — | 96 | % | 实测峰值；见[效率测试数据](Test_Data/效率测试.txt) |
+| 变换效率 | — | — | 96 | % | 实测峰值；见[效率测试数据](Test_Data/efficiency-test.txt) |
 | 输出电压步进 | — | 1 | — | V | — |
 | 输出电流步进 | — | 1 | — | mA | — |
 | 输出电压精度 | — | — | ±0.5 | % | — |
@@ -99,19 +103,19 @@ PCB 采用 **4 层、1.6 mm 板厚、1 oz 铜厚**设计，常用阻容器件全
 
 | 顶层 | 底层 |
 |---|---|
-| ![PCB 顶层](Docs/顶层.png) | ![PCB 底层](Docs/底层.png) |
+| ![PCB 顶层](Docs/pcb-top.png) | ![PCB 底层](Docs/pcb-bottom.png) |
 
 ### 3.2 电源架构
 
 功率级采用 PSFB 移相全桥拓扑，通过改变两组桥臂之间的相移调节传输功率。
 
-![电源架构](Docs/电源架构.png)
+![电源架构](Docs/power-architecture-zh.png)
 
 ### 3.3 硬件架构
 
 控制器负责电压、电流、温度和辅助电源采样，并通过 HRTIM 产生带固定死区的四路全桥驱动信号。独立比较器和 HRTIM Fault 通路用于硬件过流关断。
 
-![硬件架构](Docs/硬件架构.png)
+![硬件架构](Docs/hardware-architecture-zh.png)
 
 ### 3.4 控制策略架构
 
@@ -150,7 +154,7 @@ flowchart LR
 
 ### 4.2 变压器
 
-![变压器打样参数](Docs/变压器打样参数.jpg)
+![变压器打样参数](Docs/transformer-specification-zh.jpg)
 
 | 项目 | 参数 |
 |---|---|
@@ -189,9 +193,9 @@ flowchart LR
 
 推荐使用锡膏和加热台或回流焊完成贴片焊接。这里就不过多赘述了，相信复刻本项目的同学都是焊接老手了。
 
-![制作完成（正面）](Docs/制作完成.png)
+![制作完成（正面）](Docs/assembled-front.png)
 
-![制作完成（背面）](Docs/制作完成2.png)
+![制作完成（背面）](Docs/assembled-back.png)
 
 焊接完成后，为避免造成无谓的损失，请一定要检查各个芯片（尤其是驱动芯片）的朝向（通过丝印标记检查）无误，如果方向错误，很可能导致**主控烧毁**。
 
@@ -203,7 +207,7 @@ flowchart LR
 
 连接电容的时候先在引脚上焊接端子，再使用螺丝固定到输出端。
 
-![输出电容连接](Docs/输出电容的连接.png)
+![输出电容连接](Docs/output-capacitor-connection.png)
 
 ## 5. 固件烧录与 IAP 更新
 
@@ -225,7 +229,7 @@ flowchart LR
 - SH1.0 转 2.54 mm 转接板
 - SH1.0 接口连接线
 
-![烧录所需设备](Docs/准备设备.png)
+![烧录所需设备](Docs/flashing-equipment-zh.png)
 
 在电脑中下载安装 [STM32 ST-LINK Utility](https://www.st.com/en/development-tools/stsw-link004.html)，并建议先[下载当前工程（ZIP）](https://github.com/AzidoPP/HVCCPS-V1.4/archive/refs/heads/main.zip)或使用[在线烧录器](https://azidopp.github.io/HVCCPS-V1.4/BootLoaderHostUI/)或[在线上位机](https://azidopp.github.io/HVCCPS-V1.4/AppHostUI/)。
 
@@ -246,14 +250,14 @@ flowchart LR
 1. 将板卡的 `SWCLK`、`SWDIO`、`GND` 和 `3.3 V` 与 ST-Link V2 对应连接。
 2. 打开 STM32 ST-LINK Utility，选择 Bootloader HEX 文件并执行烧录。
 
-   ![使用 ST-LINK Utility 烧录 Bootloader](Docs/stlinkutility.png)
+   ![使用 ST-LINK Utility 烧录 Bootloader](Docs/stlink-utility-zh.png)
 
 3. 烧录完成后复位板卡；若 `LED_A` 点亮，说明 Bootloader 已正常启动。
 4. 断开 ST-Link，改用 USB 转 TTL 模块连接板卡的 `TX`、`RX`、`GND` 和 `3.3 V`，其中 TX 与 RX 需要交叉连接。
 5. 推荐在已下载的工程中打开 [`BootLoaderHostUI/index.html`](BootLoaderHostUI/index.html)；也可以直接使用[在线 IAP 烧录页面](https://azidopp.github.io/HVCCPS-V1.4/BootLoaderHostUI/)。请使用最新版 Chrome 或 Edge。
 6. 在页面中连接串口并选择 App HEX 文件，点击烧录后按下板卡的 **RST** 键。
 
-   ![使用 IAP 页面烧录 App 固件](Docs/IAP烧录.png)
+   ![使用 IAP 页面烧录 App 固件](Docs/iap-flashing-zh.png)
 
 7. 等待传输和校验完成。再次复位板卡后，若 `LED_A` 持续闪烁，说明 App 已成功启动。
 
@@ -338,7 +342,7 @@ flowchart LR
 
 | 波形 1 | 波形 2 |
 |---|---|
-| ![原边电流波形 1](Test_Data/50kHz/原边电流/_74.png) | ![原边电流波形 2](Test_Data/50kHz/原边电流/_78.png) |
+| ![原边电流波形 1](Test_Data/50kHz/primary-current/_74.png) | ![原边电流波形 2](Test_Data/50kHz/primary-current/_78.png) |
 
 图中蓝色波形为滞后桥臂 SW，红色波形为超前桥臂 SW，黄色波形为电流互感器信号经整流采样后转换得到的电压信号。
 
@@ -346,7 +350,7 @@ flowchart LR
 
 | 波形 1 | 波形 2 |
 |---|---|
-| ![副边电流波形 1](Test_Data/50kHz/副边电流/_67.png) | ![副边电流波形 2](Test_Data/50kHz/副边电流/_69.png) |
+| ![副边电流波形 1](Test_Data/50kHz/secondary-current/_67.png) | ![副边电流波形 2](Test_Data/50kHz/secondary-current/_69.png) |
 
 图中蓝色波形为滞后桥臂 SW，红色波形为超前桥臂 SW，黄色波形为 AMC1301 采样信号经差分放大后反馈至原边的电压信号。
 
@@ -354,7 +358,7 @@ flowchart LR
 
 | 副边电压波形 1 | 副边电压波形 2 |
 |---|---|
-| ![副边电压波形 1](Test_Data/50kHz/将输入滤波电容改为1nF后电压反馈/313V-60.png) | ![副边电压波形 2](Test_Data/50kHz/将输入滤波电容改为1nF后电压反馈/370V-100.png) |
+| ![副边电压波形 1](Test_Data/50kHz/voltage-feedback-with-1nf-input-filter/313V-60.png) | ![副边电压波形 2](Test_Data/50kHz/voltage-feedback-with-1nf-input-filter/370V-100.png) |
 
 图中蓝色波形为滞后桥臂 SW，红色波形为超前桥臂 SW，黄色波形为 AMC1311B 采样信号经差分放大后反馈至原边的电压信号。
 
