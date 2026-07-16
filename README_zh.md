@@ -411,3 +411,5 @@ flowchart LR
 ## 8. 许可证与修改记录
 
 本仓库采用 [GPL-3.0](LICENSE) 许可证。项目的版本变化和详细修改内容见 [`log.md`](log.md)。
+
+本仓库不保存 MCU 厂商手册副本；项目使用的官方资料入口见 [MCU 参考资料](Docs/references.md)。

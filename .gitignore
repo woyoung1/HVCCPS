@@ -77,3 +77,10 @@ dist/
 .claude/
 CLAUDE.local.md
 AGENTS.md
+
+# ===== Vendor manuals (use Docs/references.md links instead) =====
+/Docs/STM32G474CB.pdf
+/Docs/an2606-introduction-to-system-memory-boot-mode-on-stm32-mcus-stmicroelectronics.pdf
+/Docs/rm0440-stm32g4-series-advanced-armbased-32bit-mcus-stmicroelectronics.pdf
+/Docs/stm32g4-HRTIM.md
+/stm32g4-HRTIM.md

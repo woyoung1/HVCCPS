@@ -411,3 +411,5 @@ The arc test visually demonstrates the high-voltage output. Arc testing is extre
 ## 8. License and changelog
 
 This repository is licensed under [GPL-3.0](LICENSE). See [`log.md`](log.md) for version history and detailed changes.
+
+MCU vendor manuals are linked rather than copied into this repository. See [MCU reference documentation](Docs/references.md) for the official sources used by the project.
