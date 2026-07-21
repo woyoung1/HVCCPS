@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HVCCPS IAP</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="i18n.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -13,7 +14,16 @@
       <h1>HVCCPS IAP</h1>
       <p>STM32G474 UART3 firmware loader</p>
     </div>
-    <div class="link-status" id="linkStatus">DISCONNECTED</div>
+    <div class="topbar-actions">
+      <label class="language-picker" title="Language">
+        <span>Language</span>
+        <select data-i18n-language aria-label="Language">
+          <option value="en">English</option>
+          <option value="zh-CN">中文</option>
+        </select>
+      </label>
+      <div class="link-status" id="linkStatus">DISCONNECTED</div>
+    </div>
   </header>
 
   <main class="shell">

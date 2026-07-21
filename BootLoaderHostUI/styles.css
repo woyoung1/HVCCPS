@@ -72,6 +72,28 @@ p {
   background: #ecfdf3;
 }
 
+.topbar-actions,
+.language-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.language-picker {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.language-picker select {
+  min-height: 34px;
+  padding: 5px 24px 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
 .shell {
   display: grid;
   grid-template-columns: minmax(360px, 520px) minmax(360px, 1fr);
@@ -224,6 +246,11 @@ dd {
   .topbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .topbar-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .shell {

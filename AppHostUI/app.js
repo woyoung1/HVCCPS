@@ -9,6 +9,9 @@ const protocol = window.HvccpsProtocol;
 if (!protocol) throw new Error("HvccpsProtocol is not loaded.");
 const historyLib = window.HvccpsHistory;
 if (!historyLib) throw new Error("HvccpsHistory is not loaded.");
+const i18n = window.HvccpsI18n;
+if (!i18n) throw new Error("HvccpsI18n is not loaded.");
+const tr = (text) => i18n.t(text);
 
 const {
   MAX_CV_V,
@@ -716,7 +719,7 @@ function buildChartDatasets() {
   return state.selectedChartMetrics.map((metricKey, index) => {
     const metric = METRIC_MAP[metricKey];
     return {
-      label: metric.label,
+      label: tr(metric.label),
       metricKey,
       order: index,
       data: state.series[metricKey],
@@ -760,7 +763,7 @@ function buildChartScales() {
       offset,
       grid: { drawOnChartArea: index === 0, color: "rgba(23, 32, 42, 0.08)" },
       ticks: { color: metric.color, maxTicksLimit: 5 },
-      title: { display: true, text: metric.axisLabel, color: metric.color }
+      title: { display: true, text: tr(metric.axisLabel), color: metric.color }
     };
   });
   return scales;
@@ -804,7 +807,7 @@ function buildChart() {
           callbacks: {
             label(context) {
               const metric = METRIC_MAP[context.dataset.metricKey];
-              return `${metric.label}: ${formatSig(context.parsed.y)}`;
+              return `${tr(metric.label)}: ${formatSig(context.parsed.y)}`;
             }
           }
         }
@@ -2494,13 +2497,13 @@ function renderCycleOverlay() {
   ctx.translate(18, padT + plotH / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = "center";
-  ctx.fillText(state.cyclePrefs.yMode === "physical" ? "per-signal full-scale" : "normalized 0..full-scale", 0, 0);
+  ctx.fillText(tr(state.cyclePrefs.yMode === "physical" ? "per-signal full-scale" : "normalized 0..full-scale"), 0, 0);
   ctx.restore();
 
   ctx.textAlign = "center";
   ctx.textBaseline = "alphabetic";
   ctx.fillStyle = "#5a6776";
-  ctx.fillText(Number.isFinite(periodUs) ? "switching period (μs)" : "switching period (% of T_sw)",
+  ctx.fillText(tr(Number.isFinite(periodUs) ? "switching period (μs)" : "switching period (% of T_sw)"),
     padL + plotW / 2, padT + plotH + 26);
 
   // --- Sample traces (the raw 24 samples, straight lines, no smoothing,
@@ -2658,7 +2661,7 @@ function renderCycleOverlay() {
     for (const b of bridges) {
       ctx.fillStyle = b.color;
       ctx.fillRect(chipX, padT + 2, 10, 3);
-      const label = `${b.label} 50%`;
+      const label = `${tr(b.label)} 50%`;
       ctx.fillText(label, chipX + 14, padT + 7);
       chipX += ctx.measureText(label).width + 28;
     }
@@ -3021,6 +3024,12 @@ function boot() {
   });
 
   updateSystemUi();
+
+  document.addEventListener("hvccps-languagechange", () => {
+    updateChartSelectionUi();
+    syncChartConfiguration();
+    if (state.cycleOpen) renderCycleOverlay();
+  });
 }
 
 document.addEventListener("DOMContentLoaded", boot);

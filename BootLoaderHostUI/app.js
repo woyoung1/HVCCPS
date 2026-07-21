@@ -1,5 +1,9 @@
 "use strict";
 
+const i18n = window.HvccpsI18n;
+if (!i18n) throw new Error("HvccpsI18n is not loaded.");
+const tr = (text) => i18n.t(text);
+
 const APP_BASE = 0x08004000;
 const APP_CONFIG_PAGE = 0x0801F800;
 const TARGET_MAGIC = 0x50435648;
@@ -62,6 +66,7 @@ let rxQueue = [];
 let pendingReadResolvers = [];
 let image = null;
 let abortRequested = false;
+const logEntries = [];
 
 const crcTable = makeCrcTable();
 
@@ -100,13 +105,20 @@ function frameCrc(header, payload) {
 }
 
 function log(message) {
-  const stamp = new Date().toLocaleTimeString();
-  ui.logOutput.textContent += `[${stamp}] ${message}\n`;
+  logEntries.push({ at: new Date(), message });
+  renderLog();
   ui.logOutput.scrollTop = ui.logOutput.scrollHeight;
 }
 
+function renderLog() {
+  ui.logOutput.textContent = logEntries
+    .map((entry) => `[${entry.at.toLocaleTimeString(i18n.language)}] ${tr(entry.message)}`)
+    .join("\n");
+  if (logEntries.length > 0) ui.logOutput.textContent += "\n";
+}
+
 function setPhase(text) {
-  ui.phaseText.textContent = text;
+  ui.phaseText.textContent = tr(text);
 }
 
 function setProgress(done, total) {
@@ -116,7 +128,7 @@ function setProgress(done, total) {
 }
 
 function setConnected(connected) {
-  ui.linkStatus.textContent = connected ? "CONNECTED" : "DISCONNECTED";
+  ui.linkStatus.textContent = tr(connected ? "CONNECTED" : "DISCONNECTED");
   ui.linkStatus.classList.toggle("connected", connected);
   ui.connectButton.disabled = connected;
   ui.disconnectButton.disabled = !connected;
@@ -406,7 +418,7 @@ async function loadFile(file) {
 
   ui.fileName.textContent = image.name || "--";
   ui.imageAddress.textContent = `${hex32(image.minAddr)} - ${hex32(image.maxAddr)}`;
-  ui.imageSize.textContent = `${image.data.length} bytes`;
+  ui.imageSize.textContent = tr(`${image.data.length} bytes`);
   ui.imageCrc.textContent = hex32(image.crc);
   setProgress(0, image.data.length);
   setPhase("Ready");
@@ -620,7 +632,10 @@ ui.abortButton.addEventListener("click", () => {
 });
 
 ui.clearLogButton.addEventListener("click", () => {
+  logEntries.length = 0;
   ui.logOutput.textContent = "";
 });
+
+document.addEventListener("hvccps-languagechange", renderLog);
 
 setConnected(false);
