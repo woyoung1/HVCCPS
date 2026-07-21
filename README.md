@@ -38,8 +38,6 @@ The public contents of this repository are licensed under [GPL-3.0](LICENSE). Wh
 
 ### 2.1 Electrical specifications
 
-The following specifications apply to the default **1:100** transformer and the publicly released firmware.
-
 | Parameter | Minimum | Typical | Maximum | Unit | Notes |
 |---|---:|---:|---:|:---:|---|
 | Input voltage (DC) | 18 | 24 | 28 | V | Rated input-voltage range |

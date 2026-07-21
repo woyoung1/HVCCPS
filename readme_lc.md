@@ -3,6 +3,9 @@
 [![Bilibili followers](https://img.shields.io/badge/dynamic/json?color=blue&label=BiliBili&labelColor=white&query=$.data.follower&url=https://api.bilibili.com/x/relation/stat?vmid=1084866085&logo=bilibili)](https://space.bilibili.com/1084866085)
 [![YouTube](https://img.shields.io/badge/YouTube-white?logo=youtube&logoColor=FF0000)](https://www.youtube.com/@lyyontop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/AzidoPP/HVCCPS-V1.4?color=yellow&logo=github&labelColor=black&label=Latest)](https://github.com/AzidoPP/HVCCPS-V1.4)
+[![Star History Chart](https://api.star-history.com/svg?repos=AzidoPP/HVCCPS-V1.4&type=date&legend=top-left)](https://www.star-history.com/#AzidoPP/HVCCPS-V1.4&type=date&legend=top-left)
+
+📺 **项目说明视频：** [在哔哩哔哩观看](https://www.bilibili.com/video/BV1GMjm6cExY)
 
 **QQ交流群：582594264**
 
@@ -38,7 +41,7 @@
   <div style="display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 28px;">
     <a href="#intro" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 999px; color: #0f172a; text-decoration: none; background: #f8fafc; font-weight: 700;">项目简介</a>
     <a href="#specs" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 999px; color: #0f172a; text-decoration: none; background: #f8fafc; font-weight: 700;">技术参数</a>
-    <a href="#hardware" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 999px; color: #0f172a; text-decoration: none; background: #f8fafc; font-weight: 700;">硬件架构</a>
+    <a href="#hardware" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 999px; color: #0f172a; text-decoration: none; background: #f8fafc; font-weight: 700;">架构</a>
     <a href="#assembly" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 999px; color: #0f172a; text-decoration: none; background: #f8fafc; font-weight: 700;">制作装配</a>
     <a href="#firmware" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 999px; color: #0f172a; text-decoration: none; background: #f8fafc; font-weight: 700;">固件烧录</a>
     <a href="#hostui" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 999px; color: #0f172a; text-decoration: none; background: #f8fafc; font-weight: 700;">上位机</a>
@@ -49,7 +52,7 @@
 
   <h3 style="margin: 22px 0 8px; color: #1f2937;">1.1 项目概述</h3>
   <p>HVCCPS V1.4 是一款基于 <strong>STM32G474CBT6</strong> 的数控高压 DC-DC 电源，功率级采用 <strong>PSFB（Phase-Shifted Full Bridge，移相全桥）</strong>拓扑。它可用于高压电容充电及实验室高压供电，公开版固件支持 <strong>CV（恒压）、CC（恒流）和 CP（恒功率）</strong>控制。</p>
-  <p>在推荐工作条件下，电源输入为 18-28 V DC，公开固件输出限制为 <strong>0-2200 V、0-200 mA、0-400 W</strong>。项目功率密度约为 <strong>40 W/in³</strong>。</p>
+  <p>在推荐工作条件下，电源输入为 18–28 V DC，公开固件输出限制为 <strong>0–2200 V、0–200 mA、0–400 W</strong>。项目功率密度约为 <strong>40 W/in³</strong>。</p>
   <p>PCB 使用 EasyEDA（立创 EDA 专业版）设计，仓库提供完整的 <a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/PCB/ProPrj_HVCCPS_V1.4_Release.epro2" style="color: #0369a1; font-weight: 700;">EasyEDA 工程文件</a>、<a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/PCB/Gerber_HVCCPS_V1.4.zip" style="color: #0369a1; font-weight: 700;">Gerber 制板文件</a>和 <a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/Docs/BOM.xlsx" style="color: #0369a1; font-weight: 700;">BOM</a>，便于复刻与二次开发。</p>
 
   <h3 style="margin: 22px 0 8px; color: #1f2937;">1.2 固件与许可证说明</h3>
@@ -80,8 +83,8 @@
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">开关频率</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">11</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">35</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">45</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center; background: #f8fafc;">kHz</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">默认自动变频，35 kHz 为基准频率</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">栅极驱动死区</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">200</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center;">ns</td><td style="padding: 9px; border: 1px solid #dbe3ef;">-</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">变换效率</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">96</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center; background: #f8fafc;">%</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">实测峰值；见<a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/Test_Data/efficiency-test.txt" style="color: #0369a1; font-weight: 700;">效率测试数据</a></td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">输出电压有效设定步进</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">1</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center;">V</td><td style="padding: 9px; border: 1px solid #dbe3ef;">上位机发送前取整；通信协议仍以整数 mV 传输</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">输出电流有效设定步进</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">1</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center; background: #f8fafc;">mA</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">固件及通信协议量化；上位机输入框当前标称步进为 0.1 mA，发送时取整</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">输出电压步进</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">1</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center;">V</td><td style="padding: 9px; border: 1px solid #dbe3ef;">-</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">输出电流步进</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">1</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center; background: #f8fafc;">mA</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">-</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">输出电压精度</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">±0.5</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center;">%</td><td style="padding: 9px; border: 1px solid #dbe3ef;">-</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">输出电流精度</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right; background: #f8fafc;">±1</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center; background: #f8fafc;">%</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">-</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">功率密度</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">40</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: right;">-</td><td style="padding: 9px; border: 1px solid #dbe3ef; text-align: center;">W/in³</td><td style="padding: 9px; border: 1px solid #dbe3ef;">按整机有效体积计算</td></tr>
@@ -105,13 +108,14 @@
     </thead>
     <tbody>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">控制模式</td><td style="padding: 9px; border: 1px solid #dbe3ef;">CV / CC / CP</td><td style="padding: 9px; border: 1px solid #dbe3ef;">三环 PI 自动仲裁</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">固定占空比模式</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">0-100%</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">仅用于调试，仍受软启动约束</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">固定占空比模式</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">0–100%</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">仅用于调试，仍受软启动约束</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">软启动</td><td style="padding: 9px; border: 1px solid #dbe3ef;">每个控制周期最多增加 10% 占空比</td><td style="padding: 9px; border: 1px solid #dbe3ef;">默认值，可通过上位机配置管理器调整</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">运行定时</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">连续或 1-65534 s</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">到时自动关闭输出</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">硬件过流保护（OCP）</td><td style="padding: 9px; border: 1px solid #dbe3ef;">原边 SW 节点交流峰值约 60 A</td><td style="padding: 9px; border: 1px solid #dbe3ef;">COMP1 → HRTIM FAULT4 异步关断；<strong>不是 60 A 输入额定值</strong></td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">软件过温保护（OTP）</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">70 °C</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">MOS NTC 或 MCU 内部温度任一路超过阈值即关断</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">独立看门狗（IWDG）</td><td style="padding: 9px; border: 1px solid #dbe3ef;">约 200 ms</td><td style="padding: 9px; border: 1px solid #dbe3ef;">主循环或控制 ISR 异常时触发复位</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">按键</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">A / B 两组预设</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">可保存 CV、CC、CP 和运行时间，支持脱机运行及停机</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">运行定时</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">连续或 1–65534 s</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">到时自动关闭输出</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">供电 UVLO / OVP</td><td style="padding: 9px; border: 1px solid #dbe3ef;">母线 &gt;32 V；12 V、5 V、3.3 V 窗口保护</td><td style="padding: 9px; border: 1px solid #dbe3ef;">下位机内部抑制实际输出，软件 enable 与通讯保持</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">硬件过流保护（OCP）</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">原边 SW 节点交流峰值约 60 A</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">COMP1 → HRTIM FAULT4 异步关断；<strong>不是 60 A 输入额定值</strong></td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">软件过温保护（OTP）</td><td style="padding: 9px; border: 1px solid #dbe3ef;">70 °C</td><td style="padding: 9px; border: 1px solid #dbe3ef;">MOS NTC 或 MCU 内部温度任一路超过阈值即关断</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">独立看门狗（IWDG）</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">约 200 ms</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">主循环或控制 ISR 异常时触发复位</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">按键</td><td style="padding: 9px; border: 1px solid #dbe3ef;">A / B 两组预设</td><td style="padding: 9px; border: 1px solid #dbe3ef;">可保存 CV、CC、CP 和运行时间，支持脱机运行及停机</td></tr>
     </tbody>
   </table>
   <p>OCP 和 OTP 触发后均会锁存停机状态。再次启动时固件会清除锁存；如果故障条件仍然存在，保护会立即再次触发。</p>
@@ -132,10 +136,10 @@
   </table>
 
   <h3 style="margin: 22px 0 8px; color: #1f2937;">2.4 高压侧设计说明</h3>
-  <p>高压副边的 PCB 电气间隙均 <strong>≥ 9.5 mm</strong>，相关电路按 7000 V 耐压目标进行布局设计。这里的 7000 V 是高压侧的设计目标，<strong>不代表整机额定输出为 7000 V</strong>；默认版本变压器、器件选型、反馈比例和公开固件的额定输出仍以 2200 V 为准。</p>
-  <p>如需更高输出电压，必须重新核算并验证变压器匝比、整流二极管、输出电容和反馈网络，同时修改固件参数。本 PCB 布局的设计安全上限为 7000 V；如需改版，切勿超过 7000 V。</p>
+  <p>高压副边的 PCB 电气间隙均 <strong>≥ 9.5 mm</strong>，如有需求可以适当改版增加输出电压。</p>
+  <p>如需更高输出电压，必须重新核算并验证变压器匝比、整流二极管、输出电容和反馈网络，同时修改固件参数。</p>
 
-  <h2 id="hardware" style="margin: 34px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #0f172a; color: #0f172a;">3. 硬件架构</h2>
+  <h2 id="hardware" style="margin: 34px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #0f172a; color: #0f172a;">3. 架构</h2>
 
   <h3 style="margin: 22px 0 8px; color: #1f2937;">3.1 PCB 布局</h3>
   <p>PCB 采用 <strong>4 层、1.6 mm 板厚、1 oz 铜厚</strong>设计，常用阻容器件全部采用 0805 封装，便于焊接。顶层主要布置主功率变压器，底层主要布置驱动、控制和采样电路。</p>
@@ -158,6 +162,18 @@
   <p>控制器负责电压、电流、温度和辅助电源采样，并通过 HRTIM 产生带固定死区的四路全桥驱动信号。独立比较器和 HRTIM Fault 通路用于硬件过流关断。</p>
   <img src="https://image.lceda.cn/oshwhub/pullImage/86baa95a7f284a8e82966bb8c7454091.png" alt="硬件架构" style="display: block; width: 100%; max-width: 920px; margin: 12px auto 24px; border-radius: 12px; border: 1px solid #dbe3ef; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.10);">
 
+  <h3 style="margin: 22px 0 8px; color: #1f2937;">3.4 控制策略架构</h3>
+  <div style="margin: 12px 0 18px; padding: 16px 18px; border: 1px solid #bfdbfe; border-radius: 12px; background: #eff6ff; color: #1e3a5f;">
+    <ol style="margin: 0; padding-left: 22px;">
+      <li><strong>运行目标：</strong>上位机或 A/B 按键提供 CV、CC、CP 和运行时间，active 配置提供 PI、软启动与变频参数。</li>
+      <li><strong>采样与滤波：</strong>同步采集 VSEC、ISEC、VPRI、IPRI_DC、AUX12、AUX5、VCC 和温度，进行 24 点高速均值/峰值及辅助电源滑动平均。</li>
+      <li><strong>保护判断：</strong>UVLO/OVP 或 OTP 使实际输出关断并令 duty = 0；OCP 通过 HRTIM FAULT4 硬件异步关断；正常时形成 Vout、Iout、Pin/Pout 反馈量。</li>
+      <li><strong>闭环控制：</strong>CV、CC、CP 三个 PI 并行计算，取三者最小占空比，经只限制 duty 上升的软启动限速后写入 HRTIM CMP3。</li>
+      <li><strong>功率与变频：</strong>HRTIM 驱动带固定约 200 ns 死区的 PSFB 功率级，输出返回 ADC 采样；TIM7 根据 duty 计分与前馈自动调整开关频率。</li>
+    </ol>
+  </div>
+  <p>控制器本质上是 <strong>三环并联的占空比限制器</strong>：CV、CC、CP 三个 PI 同时给出允许的移相占空比，固件取其中最小值作为实际控制量，再经过软启动限速后写入 HRTIM。</p>
+
   <h2 id="assembly" style="margin: 34px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #0f172a; color: #0f172a;">4. 制作与装配</h2>
 
   <h3 style="margin: 22px 0 8px; color: #1f2937;">4.1 制板</h3>
@@ -165,7 +181,8 @@
   <div style="display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 22px;">
     <span style="display: inline-block; padding: 8px 12px; border-radius: 10px; background: #ecfeff; border: 1px solid #a5f3fc; color: #155e75; font-weight: 800;">层数：4 层</span>
     <span style="display: inline-block; padding: 8px 12px; border-radius: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 800;">板厚：1.6 mm</span>
-    <span style="display: inline-block; padding: 8px 12px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-weight: 800;">铜厚：1 oz</span>
+    <span style="display: inline-block; padding: 8px 12px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-weight: 800;">外层铜厚：1 oz</span>
+    <span style="display: inline-block; padding: 8px 12px; border-radius: 10px; background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-weight: 800;">内层铜厚：0.5 oz</span>
   </div>
 
   <h3 style="margin: 22px 0 8px; color: #1f2937;">4.2 变压器</h3>
@@ -176,8 +193,8 @@
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">磁芯</td><td style="padding: 9px; border: 1px solid #dbe3ef;">EC49，40 材</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">匝数</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">初级 9 匝，次级 900 匝</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">匝数比</td><td style="padding: 9px; border: 1px solid #dbe3ef;">1:100</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">初级绕组引脚</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">2-3</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">次级绕组引脚</td><td style="padding: 9px; border: 1px solid #dbe3ef;">5-8</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">初级绕组引脚</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">2–3</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">次级绕组引脚</td><td style="padding: 9px; border: 1px solid #dbe3ef;">5–8</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">次级线径</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">0.3 mm</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">气隙</td><td style="padding: 9px; border: 1px solid #dbe3ef;">不需要</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">其他要求</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">尽量减小漏感，完成后灌胶密封</td></tr>
@@ -197,8 +214,8 @@
     <tbody>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">L1</td><td style="padding: 9px; border: 1px solid #dbe3ef;"><a href="https://item.taobao.com/item.htm?id=524929973196" style="color: #0369a1; font-weight: 700;">参考链接</a></td><td style="padding: 9px; border: 1px solid #dbe3ef;">-</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">R8</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">10 kΩ NTC，B = 3450 K（<a href="https://detail.tmall.com/item.htm?id=610279139920" style="color: #0369a1; font-weight: 700;">参考链接</a>）</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">-</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">Q1-Q4</td><td style="padding: 9px; border: 1px solid #dbe3ef;">CSD18540 或 CSD19531</td><td style="padding: 9px; border: 1px solid #dbe3ef;">注意管子来源</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">R24-R28</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">Viking（光颉）高压电阻，2 MΩ、2512、3000 V（<a href="https://item.taobao.com/item.htm?id=987002402599" style="color: #0369a1; font-weight: 700;">参考链接</a>）</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">-</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">Q1–Q4</td><td style="padding: 9px; border: 1px solid #dbe3ef;">CSD18540 或 CSD19531</td><td style="padding: 9px; border: 1px solid #dbe3ef;">注意管子来源</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">R24–R28</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">Viking（光颉）高压电阻，2 MΩ、2512、3000 V（<a href="https://item.taobao.com/item.htm?id=987002402599" style="color: #0369a1; font-weight: 700;">参考链接</a>）</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">-</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;">U7、U8</td><td style="padding: 9px; border: 1px solid #dbe3ef;">UCC27211；可替换为 SLM27211</td><td style="padding: 9px; border: 1px solid #dbe3ef;">市面上 UCC27211 假货较多，SLM27211 可 Pin-to-Pin 替换</td></tr>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">U9</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">EE8.3 1:200 电流互感器（<a href="https://item.taobao.com/item.htm?id=721406076659" style="color: #0369a1; font-weight: 700;">参考链接</a>）</td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">-</td></tr>
     </tbody>
@@ -217,6 +234,8 @@
       <img src="https://image.lceda.cn/oshwhub/pullImage/a42465ba650147b5ba4522648195e70e.png" alt="制作完成背面" style="display: block; width: 100%;">
     </div>
   </div>
+  <p>焊接完成后，为避免造成无谓的损失，请一定要检查各个芯片（尤其是驱动芯片）的朝向（通过丝印标记检查）无误，如果方向错误，很可能导致<strong>主控烧毁</strong>。</p>
+  <img src="https://image.lceda.cn/oshwhub/pullImage/f0b15405fd60425090a1e6cab46d95a3.png" alt="检查芯片安装方向" style="display: block; width: 100%; max-width: 820px; margin: 12px auto 24px; border-radius: 12px; border: 1px solid #dbe3ef; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.10);">
 
   <h3 style="margin: 22px 0 8px; color: #1f2937;">4.5 输出电容</h3>
   <p>作为通用高压电源使用时，可外接 <strong>4000 V、0.2 µF</strong> 薄膜电容作为输出滤波电容（<a href="https://item.taobao.com/item.htm?id=814880889031" style="color: #0369a1; font-weight: 700;">购买链接</a>）；作为高压电容充电器使用时，可以不安装该电容。</p>
@@ -231,7 +250,7 @@
     <thead><tr><th style="padding: 10px; border: 1px solid #dbe3ef; background: #0f172a; color: #fff;">固件</th><th style="padding: 10px; border: 1px solid #dbe3ef; background: #0f172a; color: #fff;">起始地址</th><th style="padding: 10px; border: 1px solid #dbe3ef; background: #0f172a; color: #fff;">作用</th></tr></thead>
     <tbody>
       <tr><td style="padding: 9px; border: 1px solid #dbe3ef;"><a href="https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/v0.0.1/HVCCPS_Bootloader_V0.0.1.hex" style="color: #0369a1; font-weight: 700;">Bootloader HEX</a></td><td style="padding: 9px; border: 1px solid #dbe3ef;"><code>0x08000000</code></td><td style="padding: 9px; border: 1px solid #dbe3ef;">启动检查及串口 IAP 更新</td></tr>
-      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;"><a href="https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/v0.0.1/HVCCPS_App_V0.0.1.hex" style="color: #0369a1; font-weight: 700;">App HEX</a></td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;"><code>0x08004000</code></td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">电源控制、保护、遥测和上位机通信</td></tr>
+      <tr><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;"><a href="https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/v0.0.2/HVCCPS_App_V0.0.2.hex" style="color: #0369a1; font-weight: 700;">App HEX</a></td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;"><code>0x08004000</code></td><td style="padding: 9px; border: 1px solid #dbe3ef; background: #f8fafc;">电源控制、保护、遥测和上位机通信</td></tr>
     </tbody>
   </table>
 
@@ -292,9 +311,37 @@
     <li>前面板 A/B 按键预设管理</li>
   </ul>
   <img src="https://image.lceda.cn/oshwhub/pullImage/41dbbd78c6a14702a8850ca1d7ec0439.png" alt="hostui" style="display: block; width: 100%; max-width: 920px; margin: 12px auto 18px; border-radius: 12px; border: 1px solid #dbe3ef; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.10);">
-  <p>连接参数为 <strong>115200 baud、8N1</strong>。建议使用最新版 Chrome 或 Edge。</p>
+  <p>连接参数为 <strong>115200 baud、8N1</strong>。建议使用最新版 Chrome 或 Edge，并一次只打开一个占用该串口的页面。</p>
 
-  <h3 style="margin: 22px 0 8px; color: #1f2937;">6.2 Bootloader 上位机</h3>
+  <h3 style="margin: 22px 0 8px; color: #1f2937;">6.2 输出校准步骤</h3>
+  <p>输出 V/I 校准需要使用 <strong>V0.0.3 或更新版本 App 固件</strong>。校准表会写入 App 独立保留的 flash 区，IAP 更新 App 时不会擦除；但写表和启用校准都会操作 flash，必须在输出关闭时进行。</p>
+  <div style="border-left: 5px solid #d73a49; padding: 11px 14px; background: #fff5f5; margin: 14px 0 22px; border-radius: 0 10px 10px 0;">
+    <strong style="color: #d73a49;">CAUTION</strong><br>
+    校准时仍然会接触高压输出。接线、测量、换挡和改负载前必须关闭输出并确认输出端已经充分放电。不要在无人监护或绝缘措施不足的情况下校准。
+  </div>
+  <ol style="margin: 8px 0 18px; padding-left: 24px;">
+    <li>烧录或更新到 V0.0.3 App 固件，连接电源控制上位机，确认串口通讯正常。</li>
+    <li>打开上位机顶栏的 <strong>Calibrate</strong> 面板，先保持 <strong>Apply calibration to the control loop</strong> 关闭。</li>
+    <li>在目标电压、电流和负载点下运行电源，用外部万用表或高压表记录实际输出。</li>
+    <li>停止输出并放电，在校准面板中填写采样点：
+      <ul style="margin: 6px 0 8px; padding-left: 22px;">
+        <li>电压点填写上位机显示的 <strong>RAW VSEC</strong> 和外部表测得的电压。</li>
+        <li>如果该电压点对应固定负载电流，可同时填写外部表测得的电流，用于负载相关的二维电压修正。</li>
+        <li>电流点填写上位机显示的 <strong>RAW ISEC</strong> 和外部表测得的电流。</li>
+      </ul>
+    </li>
+    <li>建议先采 2–5 个覆盖常用工作区的电压点；如果只关心某个工作点，也可以先采单点。电流校准可按常用负载电流范围补充 1–3 个点。</li>
+    <li>点击 <strong>Compile &amp; Preview</strong>，检查预览表中的修正量是否合理。固件会把电压修正钳位在 ±50 V、电流修正钳位在 ±50 mA，超出这个范围说明采样点或外部测量可能有误。</li>
+    <li>确认输出仍为关闭状态后，点击 <strong>Write Table to Flash</strong>，等待上传进度完成。</li>
+    <li>勾选 <strong>Apply calibration to the control loop</strong>，上位机会把启用开关写入并保存到配置 flash。</li>
+    <li>重新低功率启动，使用外部表复测输出。如果误差仍偏大，保持校准关闭重新采集 RAW 点，或补充新的采样点后再次写表。</li>
+  </ol>
+  <div style="border-left: 5px solid #2563eb; padding: 11px 14px; background: #eff6ff; margin: 14px 0 22px; border-radius: 0 10px 10px 0;">
+    <strong style="color: #1d4ed8;">NOTE</strong><br>
+    校准点应始终使用校准关闭时的 RAW 值作为输入。不要把已经应用校准后的普通 VSEC / ISEC 读数再次填入 RAW 列，否则会把修正量重复叠加。
+  </div>
+
+  <h3 style="margin: 22px 0 8px; color: #1f2937;">6.3 Bootloader 上位机</h3>
   <p>本地页面 <a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/BootLoaderHostUI/index.html" style="color: #0369a1; font-weight: 700;">BootLoaderHostUI/index.html</a> 和<a href="https://azidopp.github.io/HVCCPS-V1.4/BootLoaderHostUI/" style="color: #0369a1; font-weight: 700;">在线 IAP 烧录页面</a>均支持 Intel HEX 解析、地址范围校验、串口握手、分块传输、进度显示和错误日志，仅用于更新 App 固件。</p>
   <img src="https://image.lceda.cn/oshwhub/pullImage/f88bce7b1618450e84d71942d73f5c17.png" alt="iapui" style="display: block; width: 100%; max-width: 920px; margin: 12px auto 24px; border-radius: 12px; border: 1px solid #dbe3ef; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.10);">
 
@@ -348,19 +395,37 @@
     由于电压采样分压器的回路面积较大，且采样回路位于变压器正下方，反馈信号受到了一定干扰。固件中因此加入了针对性的数字滤波算法，以改善采样效果。
   </div>
 
-  <h3 style="margin: 22px 0 8px; color: #1f2937;">7.4 电容恒流充电测试</h3>
+  <h3 style="margin: 22px 0 8px; color: #1f2937;">7.4 启动波形</h3>
+  <p>启动波形在 3 kΩ 阻性负载下测得；150 V 输出时负载电流约为 50 mA，230 V 输出时负载电流约为 77 mA。测试用于观察闭环启动过程中的输出电压建立情况。</p>
+  <div style="display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 18px;">
+    <div style="flex: 1 1 320px; border: 1px solid #dbe3ef; border-radius: 12px; overflow: hidden; background: #fff;"><div style="padding: 8px 10px; background: #f1f5f9; font-weight: 800;">150 V / 50 mA</div><img src="https://image.lceda.cn/oshwhub/pullImage/0c3a8f85fe4944d483cb7fc726ed9ee1.png" alt="150 V 启动波形" style="display: block; width: 100%;"></div>
+    <div style="flex: 1 1 320px; border: 1px solid #dbe3ef; border-radius: 12px; overflow: hidden; background: #fff;"><div style="padding: 8px 10px; background: #f1f5f9; font-weight: 800;">230 V / 77 mA</div><img src="https://image.lceda.cn/oshwhub/pullImage/681565dee10146c3a9a1d363cf0e6488.png" alt="230 V 启动波形" style="display: block; width: 100%;"></div>
+  </div>
+
+  <h3 style="margin: 22px 0 8px; color: #1f2937;">7.5 输出电压纹波</h3>
+  <p>输出电压纹波同样在 3 kΩ 阻性负载下测得；下图分别对应 150 V / 50 mA 和 230 V / 77 mA 两组工况。</p>
+  <div style="display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 18px;">
+    <div style="flex: 1 1 320px; border: 1px solid #dbe3ef; border-radius: 12px; overflow: hidden; background: #fff;"><div style="padding: 8px 10px; background: #f1f5f9; font-weight: 800;">150 V / 50 mA</div><img src="https://image.lceda.cn/oshwhub/pullImage/0b59dcb7fa864fbfb4b4b32855286661.png" alt="150 V 输出电压纹波" style="display: block; width: 100%;"></div>
+    <div style="flex: 1 1 320px; border: 1px solid #dbe3ef; border-radius: 12px; overflow: hidden; background: #fff;"><div style="padding: 8px 10px; background: #f1f5f9; font-weight: 800;">230 V / 77 mA</div><img src="https://image.lceda.cn/oshwhub/pullImage/1607b2d4a8da47458818cc78b66d00dd.png" alt="230 V 输出电压纹波" style="display: block; width: 100%;"></div>
+  </div>
+  <div style="border-left: 5px solid #2563eb; padding: 11px 14px; background: #eff6ff; margin: 14px 0 22px; border-radius: 0 10px 10px 0;">
+    <strong style="color: #1d4ed8;">NOTE</strong><br>
+    由于没有高压探头，所以先在较低压范围测试。
+  </div>
+
+  <h3 style="margin: 22px 0 8px; color: #1f2937;">7.6 电容恒流充电测试</h3>
   <p><a href="https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/videos-v1.4/HVCCPS-V1.4-Capacitor-CC-Charging-Test.mp4" style="color: #0369a1; font-weight: 700;">观看完整测试视频</a></p>
   <p>测试使用两个 1100 µF 电容串联，等效容量约为 550 µF；上位机设置目标电压为 2000 V、限流为 200 mA。整个充电过程约耗时 5.6 s，电容电压基本呈线性上升，峰值输出功率约为 390 W。根据电容储能公式计算，平均充电功率约为 195 W。</p>
   <img src="https://image.lceda.cn/oshwhub/pullImage/3de0009200974f91ab8fa34ff4fd6f4c.jpg" alt="电容恒流充电测试第 6 秒画面" style="display: block; width: 100%; max-width: 680px; margin: 12px auto 24px; border-radius: 12px; border: 1px solid #dbe3ef; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.10);">
 
-  <h3 style="margin: 22px 0 8px; color: #1f2937;">7.5 阻性负载恒压测试</h3>
+  <h3 style="margin: 22px 0 8px; color: #1f2937;">7.7 阻性负载恒压测试</h3>
   <p><a href="https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/videos-v1.4/HVCCPS-V1.4-Resistive-CV-Test.mp4" style="color: #0369a1; font-weight: 700;">观看完整测试视频</a></p>
   <p>测试将 5 kΩ 铝壳电阻连接至输出端，并将输出电压设定为 800 V。测试过程中输出电压保持稳定，用于验证恒压环路及持续输出能力。</p>
   <img src="https://image.lceda.cn/oshwhub/pullImage/25db73a166ae4cfd820d96cf77618603.jpg" alt="阻性负载恒压测试第 9 秒画面" style="display: block; width: 100%; max-width: 680px; margin: 12px auto 24px; border-radius: 12px; border: 1px solid #dbe3ef; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.10);">
 
-  <h3 style="margin: 22px 0 8px; color: #1f2937;">7.6 拉弧测试</h3>
+  <h3 style="margin: 22px 0 8px; color: #1f2937;">7.8 拉弧测试</h3>
   <p><a href="https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/videos-v1.4/HVCCPS-V1.4-Arc-Test.mp4" style="color: #0369a1; font-weight: 700;">观看完整测试视频</a></p>
-  <p>拉弧测试用于直观展示高压输出效果。</p>
+  <p>拉弧测试用于直观展示高压输出效果。电弧测试具有极高危险性，必须采取可靠的绝缘、接地、限流、放电及外部急停措施，请勿模仿或在无人监护的情况下操作。</p>
   <div style="margin: 12px auto 24px; max-width: 680px; padding: 14px 16px; border-radius: 12px; border: 1px solid #fecaca; background: #fff5f5;">
     <strong style="color: #b91c1c;">拉弧测试画面</strong><br>
     该画面可能触发图片审核限制，请前往 GitHub 查看：<a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/Docs/test-arc-10s.jpg" style="color: #0369a1; font-weight: 800;">test-arc-10s.jpg</a>
@@ -368,6 +433,7 @@
 
   <h2 id="license" style="margin: 34px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #0f172a; color: #0f172a;">8. 许可证与修改记录</h2>
   <p>本仓库采用 <a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/LICENSE" style="color: #0369a1; font-weight: 700;">GPL-3.0</a> 许可证。项目的版本变化和详细修改内容见 <a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/log.md" style="color: #0369a1; font-weight: 700;">log.md</a>。</p>
+  <p>本仓库不保存 MCU 厂商手册副本；项目使用的官方资料入口见 <a href="https://github.com/AzidoPP/HVCCPS-V1.4/blob/main/Docs/references.md" style="color: #0369a1; font-weight: 700;">MCU 参考资料</a>。</p>
 
   <div style="margin: 28px 0 6px; padding: 16px 18px; border-radius: 12px; border: 1px solid #dbe3ef; background: #f8fafc; color: #475569;">
     <strong style="color: #0f172a;">再次提醒：</strong>立创开源社区页面可能存在审核和同步延迟，正式复刻前请回到 <a href="https://github.com/AzidoPP/HVCCPS-V1.4" style="color: #0369a1; font-weight: 900;">GitHub 主仓库</a>核对最新文档与附件。
