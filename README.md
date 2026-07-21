@@ -18,6 +18,10 @@
 
 ![HVCCPS V1.4 cover](Docs/cover.png)
 
+## Project Popularity and Support
+
+If you find this project helpful, please consider giving it a Star ⭐
+
 ## 1. Introduction
 
 ### 1.1 Overview
