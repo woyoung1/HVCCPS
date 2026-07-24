@@ -183,11 +183,12 @@ The complete bill of materials is available at [Docs/BOM.xlsx](Docs/BOM.xlsx). P
 | Reference | Part / recommendation | Notes |
 |---|---|---|
 | L1 | [Reference link](https://item.taobao.com/item.htm?id=524929973196) | — |
-| R8 | 10 kΩ NTC, B = 3450 K ([reference link](https://detail.tmall.com/item.htm?id=610279139920)) | — |
+| R8 | 10 kΩ NTC, B = 3450 K ([reference link](https://detail.tmall.com/item.htm?id=610279139920)) | Check the B value |
 | Q1–Q4 | CSD18540 or CSD19531 | Verify the source of the MOSFETs |
 | R24–R28 | Viking high-voltage resistors, 2 MΩ, 2512, 3000 V ([reference link](https://item.taobao.com/item.htm?id=987002402599)) | — |
 | U7, U8 | UCC27211; SLM27211 is a substitute | Counterfeit UCC27211 devices are common; SLM27211 is a pin-to-pin replacement |
-| U9 | EE8.3 1:200 current transformer ([reference link](https://item.taobao.com/item.htm?id=721406076659)) | — |
+| U9 | EE8.3 1:200 current transformer ([reference link](https://item.taobao.com/item.htm?id=721406076659)) | Ensure it is 1:200, not 1:100 |
+| U6 | ACS712-20A | Use the 20 A-range version, not the 30 A version |
 
 Purchase all remaining components according to the BOM.
 

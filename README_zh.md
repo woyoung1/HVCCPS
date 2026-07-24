@@ -183,11 +183,12 @@ flowchart LR
 | 位号 | 器件/建议 | 注意事项 |
 |---|---|---|
 | L1 | [参考链接](https://item.taobao.com/item.htm?id=524929973196) | — |
-| R8 | 10 kΩ NTC，B = 3450 K（[参考链接](https://detail.tmall.com/item.htm?id=610279139920)） | — |
+| R8 | 10 kΩ NTC，B = 3450 K（[参考链接](https://detail.tmall.com/item.htm?id=610279139920)） | 注意B值 |
 | Q1–Q4 | CSD18540 或 CSD19531 | 注意管子来源 |
 | R24–R28 | Viking（光颉）高压电阻，2 MΩ、2512、3000 V（[参考链接](https://item.taobao.com/item.htm?id=987002402599)） | — |
 | U7、U8 | UCC27211；可替换为 SLM27211 | 市面上 UCC27211 假货较多，SLM27211 可 Pin-to-Pin 替换 |
-| U9 | EE8.3 1:200电流互感器（[参考链接](https://item.taobao.com/item.htm?id=721406076659)） | — |
+| U9 | EE8.3 1:200电流互感器（[参考链接](https://item.taobao.com/item.htm?id=721406076659)） | 注意是1:200，而不是1:100 |
+| U6 | ACS712-20A | 注意是20A量程的版本，不是30A |
 
 其余元器件请按照 BOM 采购。
 
