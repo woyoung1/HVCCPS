@@ -180,6 +180,9 @@ The transformer used in this project was custom-made by the [Xiangrun Electronic
 
 The complete bill of materials is available at [Docs/BOM.xlsx](Docs/BOM.xlsx). Pay particular attention to the following parts when purchasing:
 
+> [!IMPORTANT]
+> Use the [Docs/BOM.xlsx](Docs/BOM.xlsx) file provided with this documentation and the key-component notes in this section as the source of truth. Do not use the BOM exported from the Lichuang EDA project.
+
 | Reference | Part / recommendation | Notes |
 |---|---|---|
 | L1 | [Reference link](https://item.taobao.com/item.htm?id=524929973196) | — |

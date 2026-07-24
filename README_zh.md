@@ -180,6 +180,9 @@ flowchart LR
 
 完整物料清单见 [Docs/BOM.xlsx](Docs/BOM.xlsx)。以下器件在采购时需要特别留意：
 
+> [!IMPORTANT]
+> BOM 以本文档提供的 [Docs/BOM.xlsx](Docs/BOM.xlsx) 及本节关键器件说明为准，请勿使用立创 EDA 工程导出的 BOM。
+
 | 位号 | 器件/建议 | 注意事项 |
 |---|---|---|
 | L1 | [参考链接](https://item.taobao.com/item.htm?id=524929973196) | — |
