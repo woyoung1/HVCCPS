@@ -1,0 +1,93 @@
+/* Power status panel: fixed header, one scroll region. */
+
+.status-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.status-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-scroll {
+  display: grid;
+  align-content: start;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--panel);
+}
+
+.readings-key {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding: 11px;
+  border-bottom: 1px solid var(--line);
+}
+
+.metric-card,
+.reading-row {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.metric-card {
+  display: grid;
+  gap: 5px;
+  min-height: 66px;
+  padding: 9px;
+  border-left: 4px solid var(--signal-color);
+}
+
+.metric-label {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.metric-value {
+  font-size: 1.08rem;
+  overflow-wrap: anywhere;
+}
+
+.readings-section {
+  border-bottom: 1px solid var(--line);
+}
+
+.readings-list {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  padding: 9px 11px 11px;
+}
+
+.reading-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 32px;
+  padding: 5px 8px;
+  border-left: 3px solid var(--signal-color);
+}
+
+.reading-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.reading-value {
+  font-size: 0.8rem;
+}
+
+@media (max-width: 680px) {
+  .readings-key {
+    grid-template-columns: 1fr;
+  }
+}

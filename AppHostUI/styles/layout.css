@@ -1,0 +1,215 @@
+/* App shell geometry.
+   ---------------------------------------------------------------------------
+   The three shell rows are ALWAYS present and fixed in height. No state ever
+   inserts or removes a row, so starting the output (or switching language)
+   cannot resize the telemetry plot. Every horizontal track that holds
+   translated text is a fixed width with ellipsis overflow, so a longer or
+   shorter translation re-letters the UI without moving anything. */
+
+.app-shell {
+  display: grid;
+  grid-template-rows: var(--topbar-h) var(--command-h) minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+
+/* ------------------------------ top bar ------------------------------ */
+.topbar {
+  display: grid;
+  grid-template-columns:
+    var(--brand-w)
+    var(--linkpill-w)
+    minmax(0, 1fr)
+    auto
+    auto
+    var(--lang-w);
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.brand {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--text);
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.brand-text {
+  display: grid;
+  min-width: 0;
+}
+
+.brand-text strong {
+  font-size: 0.86rem;
+}
+
+.brand-text em,
+.pill-text em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.7rem;
+}
+
+.link-pill {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+  cursor: pointer;
+  text-align: left;
+}
+
+.link-pill:hover {
+  border-color: var(--line-strong);
+  background: #fff;
+}
+
+.pill-text {
+  display: grid;
+  min-width: 0;
+}
+
+.pill-text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.lamp {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: #dfe4e9;
+}
+
+.lamp.is-on {
+  border-color: var(--ok);
+  background: var(--ok);
+}
+
+.lamp.is-warn {
+  border-color: var(--warn);
+  background: var(--warn);
+}
+
+.topbar-gap {
+  min-width: 0;
+}
+
+/* Fixed-width tracks: the whole point is that "Calibrate" and "校准" occupy
+   exactly the same box. */
+.nav-actions {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--nav-button-w);
+  gap: 6px;
+}
+
+.history-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.language-picker {
+  display: block;
+  min-width: 0;
+}
+
+.language-picker select {
+  width: 100%;
+  height: 34px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+/* ----------------------------- workspace ----------------------------- */
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.72fr) minmax(340px, 0.82fr);
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+  padding: 12px;
+}
+
+/* --------------------------- responsive ------------------------------ */
+@media (max-width: 1240px) {
+  :root {
+    --nav-button-w: 46px;
+  }
+
+  .nav-actions .tool-button span {
+    display: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  :root {
+    --brand-w: 56px;
+    --cb-readout-w: 150px;
+  }
+
+  .brand-text {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .topbar {
+    grid-template-columns: 1fr auto;
+    grid-auto-rows: minmax(48px, auto);
+    padding: 8px 12px;
+  }
+
+  .topbar-gap {
+    display: none;
+  }
+
+  .link-pill {
+    grid-column: 1 / -1;
+  }
+
+  .nav-actions {
+    grid-column: 1 / -1;
+    grid-auto-columns: minmax(46px, 1fr);
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(320px, 1fr) minmax(280px, 1fr);
+    overflow: auto;
+  }
+}

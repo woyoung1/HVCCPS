@@ -1,0 +1,227 @@
+/* Output calibration drawer. */
+
+.cal-status-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cal-status-row > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+}
+
+.cal-status-row span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-status-row strong {
+  overflow-wrap: anywhere;
+}
+
+.cal-status-row strong.is-ok {
+  color: var(--ok);
+}
+
+.cal-table {
+  display: grid;
+  gap: 6px;
+}
+
+.cal-table-head,
+.cal-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(110px, 1fr) minmax(124px, 1fr) 34px;
+  align-items: center;
+  gap: 8px;
+}
+
+.cal-table-head-2,
+.cal-row-i {
+  grid-template-columns: minmax(110px, 1fr) minmax(124px, 1fr) 34px;
+}
+
+.cal-table-head {
+  padding: 0 2px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-rows {
+  display: grid;
+  gap: 6px;
+}
+
+.cal-row .optional-input::placeholder {
+  color: var(--muted-2);
+}
+
+.cal-remove-button {
+  width: 32px;
+  height: 32px;
+  color: var(--muted);
+}
+
+.cal-advanced {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.cal-advanced summary {
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.82rem;
+}
+
+.cal-advanced .inline-grid {
+  margin: 10px 0;
+}
+
+.cal-preview {
+  display: grid;
+  gap: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+}
+
+.cal-preview-details summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.cal-preview-details summary strong {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.cal-preview-content {
+  display: grid;
+  gap: 10px;
+  padding: 0 10px 10px;
+}
+
+.cal-preview-summary {
+  display: grid;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.cal-preview-section {
+  display: grid;
+  gap: 6px;
+}
+
+.cal-preview-section h3 {
+  font-size: 0.72rem;
+}
+
+.cal-preview-scroll {
+  max-height: min(56vh, 600px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.cal-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 0.74rem;
+}
+
+.cal-preview-matrix {
+  min-width: 1460px;
+}
+
+.cal-preview th,
+.cal-preview td {
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.cal-preview th {
+  background: #f3f6f8;
+}
+
+.cal-delta-pos {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.cal-delta-neg {
+  background: #fff5f5;
+  color: var(--danger);
+}
+
+.cal-delta-zero {
+  color: var(--muted);
+}
+
+/* "+ Add point" is an action, not a field: keep it to its own width. */
+.form-group > .small-button {
+  justify-self: start;
+}
+
+.cal-actions {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.cal-actions .secondary-button {
+  min-height: 44px;
+}
+
+.cal-progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.cal-progress-track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8edf2;
+}
+
+.cal-progress-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--accent);
+  transition: width 120ms ease;
+}
+
+@media (max-width: 760px) {
+  .cal-status-row,
+  .cal-table-head,
+  .cal-row,
+  .cal-table-head-2,
+  .cal-row-i,
+  .cal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .cal-table-head {
+    display: none;
+  }
+}

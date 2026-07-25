@@ -1,0 +1,81 @@
+/* Workspace panels: a fixed header row plus a content region that owns its own
+   scrolling. Panel headers have a fixed height so a longer translated subtitle
+   cannot make the content area shorter. */
+
+.panel {
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 56px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+.panel-head-stack {
+  height: auto;
+  min-height: 56px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.panel-title {
+  display: grid;
+  min-width: 0;
+}
+
+.panel-title span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  background: var(--panel-soft);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.section-toggle .chevron {
+  display: inline-flex;
+}
+
+.section-toggle svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 120ms ease;
+}
+
+.section-toggle[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}

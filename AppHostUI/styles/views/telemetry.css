@@ -1,0 +1,171 @@
+/* Telemetry plot panel. Three fixed rows: header, legend, chart. The signal
+   picker floats above the chart area instead of taking a track, so opening it
+   never shrinks the plot. */
+
+.plot-panel {
+  display: grid;
+  grid-template-rows: auto 42px minmax(0, 1fr);
+}
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--line);
+  background: #fff;
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  max-width: 220px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  font-size: 0.72rem;
+  cursor: grab;
+}
+
+.legend-chip.is-empty {
+  color: var(--muted);
+  cursor: default;
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--signal-color);
+}
+
+.legend-remove {
+  display: inline-grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.legend-remove:hover {
+  background: #edf0f3;
+  color: var(--text);
+}
+
+.chart-area {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  padding: 8px 10px 12px;
+}
+
+.chart-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.signal-picker {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 10;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  gap: 9px;
+  width: min(410px, calc(100% - 20px));
+  padding: 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.signal-picker-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signal-picker-head span {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.signal-picker-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.signal-groups {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.signal-group {
+  display: grid;
+  gap: 5px;
+}
+
+.signal-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel-soft);
+  cursor: pointer;
+}
+
+.signal-option strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.76rem;
+}
+
+.signal-option em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-style: normal;
+}
+
+.signal-no-match {
+  color: var(--muted);
+  font-size: 0.76rem;
+}

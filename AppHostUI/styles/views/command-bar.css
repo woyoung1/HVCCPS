@@ -1,0 +1,217 @@
+/* Command bar -- the one and only output-state surface.
+   ---------------------------------------------------------------------------
+   Rules that make it stable:
+     * fixed height (--command-h) and fixed column tracks, so nothing here
+       resizes when the output starts or the language changes;
+     * the primary button slot is a fixed width, so "Start Output" and
+       "Update Targets" (and their Chinese equivalents) occupy the same box;
+     * STOP is always mounted at the far right -- never conditionally rendered.
+   Going live re-tints THIS BAR ONLY. The rest of the page does not move. */
+
+.command-bar {
+  display: grid;
+  grid-template-columns:
+    var(--cb-state-w)
+    var(--cb-setpoints-w)
+    var(--cb-readout-w)
+    34px
+    minmax(0, 1fr)
+    auto;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-soft);
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
+.command-bar.is-live {
+  border-bottom-color: var(--danger-line);
+  background: var(--danger-bg);
+}
+
+.command-bar.is-fault {
+  border-bottom-color: var(--danger-line);
+  background: var(--danger-bg);
+}
+
+/* ------------------------------- state ------------------------------- */
+.cb-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cb-lamp {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: #e4e8ec;
+}
+
+.cb-lamp.is-live,
+.cb-lamp.is-fault {
+  border-color: var(--danger);
+  background: var(--danger);
+}
+
+.cb-state-text {
+  display: grid;
+  min-width: 0;
+}
+
+.cb-state-text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.86rem;
+  letter-spacing: 0.02em;
+}
+
+.cb-state-text em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.7rem;
+}
+
+.command-bar.is-live .cb-state-text strong,
+.command-bar.is-fault .cb-state-text strong {
+  color: var(--danger);
+}
+
+.command-bar.is-live .cb-state-text em,
+.command-bar.is-fault .cb-state-text em {
+  color: #7f1d1d;
+}
+
+.command-bar.is-offline .cb-state-text strong {
+  color: var(--muted);
+}
+
+/* ----------------------------- setpoints ----------------------------- */
+/* Editable in both states: what you see is what will be applied. */
+.cb-setpoints {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.setpoint {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 26px;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.setpoint > span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.setpoint > em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.7rem;
+}
+
+.setpoint input {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: right;
+  font-size: 0.86rem;
+}
+
+.setpoint input:focus {
+  outline: none;
+}
+
+.setpoint:focus-within {
+  border-color: var(--focus);
+}
+
+/* ------------------------------ readout ------------------------------ */
+.cb-readout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.cb-readout span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.command-bar.is-live .cb-readout {
+  color: #7f1d1d;
+}
+
+/* ------------------------------ actions ------------------------------ */
+.cb-actions {
+  display: grid;
+  grid-template-columns: var(--cb-primary-w) var(--cb-stop-w);
+  gap: 8px;
+}
+
+.cb-actions .primary-button,
+.cb-actions .stop-button {
+  height: 40px;
+  padding: 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Staged setpoints differ from what the device is running. */
+.cb-actions .primary-button.is-armed {
+  border-color: var(--warn);
+  background: var(--warn);
+}
+
+@media (max-width: 1080px) {
+  .command-bar {
+    grid-template-columns: var(--cb-state-w) minmax(0, 1fr) 34px auto;
+  }
+
+  .cb-readout {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .command-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-auto-rows: auto;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .cb-setpoints {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cb-actions {
+    grid-template-columns: minmax(0, 1fr) var(--cb-stop-w);
+  }
+}

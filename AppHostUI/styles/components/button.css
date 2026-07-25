@@ -1,0 +1,147 @@
+/* Buttons. One base shape, four intents. No gradients, no glow -- state is
+   carried by border colour and a soft tinted background only. */
+
+.tool-button,
+.icon-button,
+.small-button,
+.primary-button,
+.secondary-button,
+.danger-button,
+.start-button,
+.stop-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.tool-button {
+  height: 38px;
+  padding: 0 8px;
+  font-size: 0.8rem;
+}
+
+.tool-button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-button svg,
+.small-button svg,
+.primary-button svg {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
+.tool-button:hover,
+.icon-button:hover,
+.small-button:hover,
+.secondary-button:hover {
+  border-color: var(--line-strong);
+  background: var(--panel-soft);
+}
+
+.tool-button.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #eef8f6;
+}
+
+.primary-button {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.primary-button:hover:not(:disabled) {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+}
+
+.secondary-button {
+  height: 36px;
+  padding: 0 12px;
+}
+
+.danger-button {
+  height: 36px;
+  padding: 0 12px;
+  border-color: var(--danger-line);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.danger-button:hover:not(:disabled) {
+  border-color: var(--danger);
+}
+
+.start-button {
+  min-height: 44px;
+  padding: 0 16px;
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+}
+
+.start-button:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+/* The permanent STOP. Same place, same size, always reachable. */
+.stop-button {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.stop-button:hover:not(:disabled) {
+  background: #8f1a12;
+  border-color: #8f1a12;
+}
+
+.small-button {
+  height: 30px;
+  padding: 0 9px;
+  font-size: 0.76rem;
+}
+
+.small-button.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.icon-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

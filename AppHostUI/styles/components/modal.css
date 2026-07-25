@@ -1,0 +1,54 @@
+/* Confirmation modal. Fixed-position like the drawers, so opening it can never
+   reflow the console behind it. */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 36, 0.42);
+}
+
+.modal-panel {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  width: min(480px, 100%);
+  padding: 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.modal-panel h2 {
+  font-size: 1rem;
+}
+
+.modal-body {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.modal-actions button {
+  min-height: 40px;
+}
+
+body.is-modal-open {
+  overflow: hidden;
+}

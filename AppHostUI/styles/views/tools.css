@@ -1,0 +1,189 @@
+/* Tools drawer -- the plugin host surface. Every class below is part of the
+   plugin-facing contract: a tool's mount() can use .tool-head, .tool-grid,
+   .tool-note, .tool-log, .tool-actions and get the house style for free. */
+
+.tools-layout {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.tools-tabs {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 12px;
+  border-right: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+.tools-tab {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.tools-tab:hover {
+  border-color: var(--line);
+  background: #fff;
+}
+
+.tools-tab.is-active {
+  border-color: var(--accent);
+  background: #eef8f6;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.tools-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+
+.tool-panel {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.tool-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tool-meta {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.tool-note {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel-soft);
+}
+
+.tool-grid span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.tool-grid strong {
+  justify-self: end;
+  overflow-wrap: anywhere;
+}
+
+.tool-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.tool-copy-line {
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tool-log {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  max-height: 320px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.7rem;
+}
+
+.tool-log-row {
+  display: grid;
+  grid-template-columns: 34px 72px 52px minmax(0, 1fr);
+  gap: 8px;
+  align-items: baseline;
+  padding: 2px 0;
+  border-bottom: 1px solid #eef1f4;
+}
+
+.tool-log-dir {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.tool-log-row.is-tx .tool-log-dir {
+  color: var(--accent);
+}
+
+.tool-log-kind,
+.tool-log-len {
+  color: var(--muted);
+}
+
+.tool-log-hex {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.tool-log-line {
+  padding: 1px 0;
+}
+
+.tool-log-line.is-ok {
+  color: var(--ok);
+}
+
+.tool-log-line.is-error {
+  color: var(--danger);
+}
+
+.tool-error {
+  color: var(--danger);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 760px) {
+  .tools-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tools-tabs {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+}

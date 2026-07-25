@@ -1,0 +1,68 @@
+/* Status chips and the validation strip. Colour only ever appears as a 1 px
+   border plus text on a soft tint -- never as a solid fill. */
+
+.state-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.state-chip.is-ok {
+  border-color: rgba(21, 128, 61, 0.35);
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.state-chip.is-warn,
+.state-chip.is-pending {
+  border-color: rgba(161, 98, 7, 0.35);
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.state-chip.is-danger {
+  border-color: rgba(180, 35, 24, 0.3);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.validation-line {
+  color: var(--muted);
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+
+.validation-line.is-error {
+  color: var(--danger);
+}
+
+.validation-line.is-ok {
+  color: var(--ok);
+}
+
+/* Explains WHY something is unavailable; it never restates "output is live"
+   (the command bar already says that). */
+.lock-note {
+  padding: 9px 10px;
+  border: 1px solid var(--danger-line);
+  border-radius: var(--radius);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 0.78rem;
+}
+
+.warn-block {
+  padding: 9px 10px;
+  border: 1px solid rgba(161, 98, 7, 0.35);
+  border-radius: var(--radius);
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 0.78rem;
+}

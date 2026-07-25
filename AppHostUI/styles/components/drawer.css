@@ -1,0 +1,150 @@
+/* Drawers and the full-screen overlay.
+   Both are `position: fixed` and animate with transform + visibility only, so
+   opening one can never reflow the workspace behind it. Nothing here toggles
+   `display`, which is also why there is no open/close flash. */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: transparent;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border-left: 1px solid var(--line-strong);
+  background: #fff;
+  box-shadow: var(--shadow);
+  visibility: hidden;
+  transform: translateX(100%);
+  transition: transform 160ms ease, visibility 160ms;
+}
+
+.drawer.is-open {
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.drawer-narrow {
+  width: min(430px, 100vw);
+}
+
+.drawer-medium {
+  width: min(560px, 100vw);
+}
+
+.drawer-wide {
+  width: min(940px, 100vw);
+}
+
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 62px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+.drawer-head span {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.drawer-body {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+
+.drawer-note {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.drawer-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.drawer-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+/* ------------------------------ overlay ------------------------------ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 160ms ease, visibility 160ms;
+}
+
+.overlay.is-open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 36, 0.42);
+}
+
+.overlay-panel {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(96vw, 1440px);
+  height: min(94vh, 920px);
+  margin: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.overlay-body {
+  display: grid;
+  grid-template-columns: minmax(250px, 310px) minmax(0, 1fr);
+  min-height: 0;
+}
+
+body.is-overlay-open {
+  overflow: hidden;
+}
+
+@media (max-width: 760px) {
+  .action-grid,
+  .inline-grid,
+  .drawer-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .overlay-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+}

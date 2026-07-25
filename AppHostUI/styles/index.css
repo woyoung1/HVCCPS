@@ -1,0 +1,24 @@
+/* Style entry point. Load order matters: tokens -> base -> layout ->
+   components -> views. Every file below is scoped to one concern so a visual
+   change lands in exactly one place. */
+
+@import "tokens.css";
+@import "base.css";
+@import "layout.css";
+
+@import "components/button.css";
+@import "components/chip.css";
+@import "components/field.css";
+@import "components/panel.css";
+@import "components/drawer.css";
+@import "components/modal.css";
+@import "components/toast.css";
+
+@import "views/command-bar.css";
+@import "views/telemetry.css";
+@import "views/status.css";
+@import "views/configure.css";
+@import "views/presets.css";
+@import "views/calibration.css";
+@import "views/cycle.css";
+@import "views/tools.css";

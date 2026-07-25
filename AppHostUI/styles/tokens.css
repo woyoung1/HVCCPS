@@ -1,0 +1,56 @@
+/* Design tokens.
+   Industrial light theme: white surfaces, 1 px borders, monospace type, and
+   status colour ONLY on state indicators -- never as a page-wide background. */
+
+:root {
+  /* surfaces */
+  --bg: #f6f7f8;
+  --panel: #ffffff;
+  --panel-soft: #f9fafb;
+  --line: #d8dde3;
+  --line-strong: #aeb7c2;
+
+  /* type */
+  --text: #17202a;
+  --muted: #687583;
+  --muted-2: #8a95a1;
+
+  /* state */
+  --accent: #166b5d;
+  --accent-strong: #0b554b;
+  --ok: #15803d;
+  --warn: #a16207;
+  --danger: #b42318;
+  --danger-line: #e2a19b;
+  --danger-bg: #fff1f0;
+  --warn-bg: #fff8e6;
+  --ok-bg: #f0fdf4;
+  --focus: #2f7dd3;
+
+  /* geometry -- these are what keep the layout from moving.
+     Every shell region has a FIXED track size, so a longer or shorter
+     translation can never reflow the page. */
+  --radius: 6px;
+  --topbar-h: 60px;
+  --command-h: 60px;
+  --brand-w: 190px;
+  --linkpill-w: 190px;
+  --nav-button-w: 118px;
+  --lang-w: 104px;
+  --cb-state-w: 208px;
+  --cb-setpoints-w: 384px;
+  --cb-readout-w: 264px;
+  --cb-primary-w: 168px;
+  --cb-stop-w: 104px;
+
+  --shadow: 0 18px 42px rgba(27, 38, 49, 0.14);
+
+  --font-mono: "Cascadia Mono", "JetBrains Mono", Consolas, Menlo, monospace;
+  --font-cjk: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+}
+
+/* Chinese glyphs are not in the mono stack; appending a CJK face keeps the
+   metrics predictable instead of letting the browser pick per-glyph. */
+:root[data-lang="zh-CN"] {
+  --font-mono: "Cascadia Mono", Consolas, "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", monospace;
+}

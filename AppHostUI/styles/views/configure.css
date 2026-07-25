@@ -1,0 +1,154 @@
+/* Configuration drawer. */
+
+.configure-layout {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.configure-tabs {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 12px;
+  border-right: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+.configure-tab {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+}
+
+.configure-tab:hover {
+  border-color: var(--line);
+  background: #fff;
+}
+
+.configure-tab.is-active {
+  border-color: var(--accent);
+  background: #eef8f6;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.configure-pages {
+  position: relative;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+
+.configure-page {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.configure-lock {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.configure-lock > div {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  width: min(400px, 100%);
+  padding: 16px;
+  border: 1px solid var(--danger-line);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: var(--shadow);
+}
+
+.timing-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.timing-summary > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+}
+
+.timing-summary span {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.timing-summary strong {
+  overflow-wrap: anywhere;
+}
+
+.config-blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.config-block {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+}
+
+.config-note {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.defaults-panel {
+  display: grid;
+  gap: 8px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-soft);
+}
+
+.defaults-panel span {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+@media (max-width: 760px) {
+  .configure-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .configure-tabs {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .grid-3,
+  .timing-summary {
+    grid-template-columns: 1fr;
+  }
+}
