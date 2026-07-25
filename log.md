@@ -3,6 +3,13 @@
 This document captures the design of the debug-mode firmware and host UI
 ahead of coding. It is the working notebook for the `debug` branch.
 
+## 2026-07-25 Main：同步模块化 HostUI
+
+- 从 release 同步新的常驻命令栏、按 key 的中英文 i18n、分层模块结构、插件系统、实时周期波形修复、固定占空比启动确认与离线校准编辑。
+- 保留公开 main/release 的运行限制：CV 0..2200 V、CC 0..200 mA、CP 0..400 W；校准表规格仍为 0..2200 V / 0..200 mA。
+- `AppHostUI/` 继续保持无构建步骤、可直接从 `file://` 打开；模块由普通 script 标签和 `src/loader.js` 的 `HV.define()` / `HV.require()` 注册表加载。
+- 验证：全部 56 个 `AppHostUI/src` JavaScript 文件通过 `node --check`；Chrome 从 `file://` 完成启动、语言切换与公开上限检查，控制台零错误。
+
 ## 2026-06-09 术语更正：ISP → IAP（自写引导程序应称在应用编程）
 
 更正背景：

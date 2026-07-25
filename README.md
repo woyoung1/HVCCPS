@@ -271,20 +271,25 @@ The board communication header exposes `SWCLK`, `SWDIO`, `TX`, `RX`, `GND`, `3.3
 
 ### 6.1 Power-control interface
 
-For offline use, download the project and open [`AppHostUI/index.html`](AppHostUI/index.html). You may also use the [online power-control interface](https://azidopp.github.io/HVCCPS-V1.4/AppHostUI/). The WebSerial page provides:
+For offline use, download the project and open [`AppHostUI/index.html`](AppHostUI/index.html) directly in Chrome or Edge; no build step or network connection is required. You may also use the [online power-control interface](https://azidopp.github.io/HVCCPS-V1.4/AppHostUI/). When opened through `file://`, the browser cannot persist serial-port authorization, so the port must be selected again after reopening the page. Serve the directory from `http://127.0.0.1` if persistent authorization is preferred.
 
 First-time users should watch the [host connection and control video tutorial](https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/videos-v1.4/HVCCPS-V1.4-Host-Control-Tutorial.mp4).
 
-- Start/stop control and CV, CC, and CP target settings
-- Fixed-duty debugging
+- A fixed command bar for start/stop control and live CV, CC, and CP target updates without resetting a timed run
+- Fixed-duty debugging with an explicit confirmation dialog before the open-loop command is sent
 - Voltage, current, power, temperature, and protection-state telemetry
 - Real-time plots and single-cycle sampled waveforms
 - Configuration of PI parameters, switching frequency, automatic frequency control, and soft start
 - Management of front-panel A/B button presets
+- Chinese/English switching without moving the command or navigation controls
+- A Tools area with run summaries, frame inspection, and declarative automatic test sequences
+- Offline calibration-table editing and preview; a device connection is required only to write or enable calibration
 
 ![Power-control host interface](Docs/hostui.png)
 
 The connection uses **115200 baud, 8N1**. Use the latest Chrome or Edge, and open only one page that accesses the serial port at a time.
+
+The interface remains plain HTML/CSS/JavaScript, but its implementation is split into `core`, `protocol`, `device`, `ui`, and `plugins` layers under `AppHostUI/src/`. `AppHostUI/src/loader.js` provides a small `HV.define()` / `HV.require()` registry so the modular source can still be loaded by ordinary script tags from `file://`. Extensions can register tool panels and status chips through the plugin host, and test or replay tooling can use the supported `window.HVCCPS` API.
 
 ### 6.2 Output calibration
 
