@@ -119,6 +119,29 @@ function mountTelemetryPanel({ root, device, selection }) {
     return scales;
   }
 
+  /**
+   * Keep the hover tooltip inside the plotting area. Chart.js only keeps it
+   * inside the canvas, so hovering a point low in the plot drops the box onto
+   * the time axis and hard against the frame. Clamping the anchor by half the
+   * box height pulls it back above the axis at any panel size.
+   */
+  function registerTooltipPositioner() {
+    const positioners = Chart.Tooltip && Chart.Tooltip.positioners;
+    if (!positioners || positioners.insidePlot) return "nearest";
+    positioners.insidePlot = function (items, eventPosition) {
+      const base = positioners.nearest.call(this, items, eventPosition);
+      if (!base) return base;
+      const { top, bottom } = this.chart.chartArea;
+      const margin = this.height / 2 + 6;
+      const lowest = top + margin;
+      const highest = bottom - margin;
+      // Degenerate only if the panel is shorter than the box; centre then.
+      const y = lowest > highest ? (top + bottom) / 2 : Math.min(Math.max(base.y, lowest), highest);
+      return { x: base.x, y };
+    };
+    return "insidePlot";
+  }
+
   function buildChart() {
     if (typeof Chart === "undefined") {
       setText(empty, t("plot.chartMissing"));
@@ -126,6 +149,8 @@ function mountTelemetryPanel({ root, device, selection }) {
       log.error("Chart.js is not loaded");
       return;
     }
+    const tooltipPosition = registerTooltipPositioner();
+    const mono = getComputedStyle(document.documentElement).getPropertyValue("--font-mono").trim();
     chart = new Chart(canvas, {
       type: "line",
       data: { datasets: buildDatasets() },
@@ -139,7 +164,22 @@ function mountTelemetryPanel({ root, device, selection }) {
           tooltip: {
             mode: "nearest",
             intersect: false,
+            position: tooltipPosition,
+            // Same surface as every other tip in the app: white, 1 px border,
+            // mono type -- not Chart.js's dark default.
+            backgroundColor: "#fff",
+            borderColor: "#aeb7c2",
+            borderWidth: 1,
+            cornerRadius: 4,
+            padding: 6,
+            titleColor: "#17202a",
+            bodyColor: "#17202a",
+            bodyFont: { family: mono },
             callbacks: {
+              // No title: it would be the raw performance.now() timestamp, a
+              // number that only grows and means nothing. The time is already
+              // on the axis.
+              title: () => [],
               label: (context) =>
                 `${t(metricLabelKey(context.dataset.metricKey))}: ${formatSig(context.parsed.y)}`
             }
