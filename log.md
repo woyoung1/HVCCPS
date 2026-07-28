@@ -3,6 +3,49 @@
 This document captures the design of the debug-mode firmware and host UI
 ahead of coding. It is the working notebook for the `debug` branch.
 
+## 2026-07-28 上位机：遥测曲线纵轴刻度读数错误修复
+
+问题现象：
+- 曲线明显在变化，但纵轴刻度（如 `0` / `0.5` / `1.0`）看上去"更新不及时"甚至完全不动；实际次级电压 1000 V 时，照刻度读出来只有 0.8 左右。
+
+根因（Chrome + Playwright 实测确认，非推测）：
+- 刻度本身并没有失效。在 60 fps 下连续对比 `axis_vSecV.min/max` 与落在 X 窗口内的数据极值，经历暂停/继续、语言切换、信号增删后，偏差次数为 0。
+- 真正的问题是**读错了轴**。`buildScales()` 为每个信号建一条独立自动缩放的 Y 轴，按 index 左右交替排布；默认 3 个信号时左侧会叠放两条轴，而 Chart.js 把第 3 个信号的轴排在**最外侧**——视线从左边缘扫过去先碰到的就是它。
+- 输出关闭时 IPRI AC 恒为 0，Chart.js 对 `min === max` 的轴扩展为 ±1，于是这条轴长期显示 `-1 / -0.5 / 0 / 0.5 / 1`，且因为信号本身不变而永远不变，看起来就是"刻度压根不更新"。
+- 实测：VSEC 曲线 1000 V 的顶点画在像素 10.2，而该像素在最外侧那条轴上读数为 **1.25**。只有 index 0 的轴画网格线，其余曲线相对于网格没有任何可读的对应关系。
+- `offset: true` 是误用。Chart.js 的 `scale.offset` 是把**取值范围**向两端各扩半格，并非把坐标轴**位置**错开；叠放轴因此多出半格留白，刻度与图区上下边缘、与网格线都对不齐。
+
+改法：全图只画一条 Y 轴——基准信号那条。
+- `AppHostUI/src/ui/chart-selection.js`
+  - 新增 `reference`（纵轴基准信号）状态，持久化到 `chart.reference.v1`；`resolveReference()` 保证它始终是已绘制信号之一，被移除时回落到第一条。
+  - `setReference()` / `reference` getter；`restoreDefaults()` 一并复位，`isDefault()` 计入基准信号（基准被改过时"默认"按钮可用）。
+- `AppHostUI/src/ui/views/telemetry-panel.js`
+  - `buildScales()`：去掉左右交替与 `offset`，所有 Y 轴统一 `position: "left"`，仅基准轴 `display: true` 并画网格线；其余轴保持隐藏但照常自动缩放，曲线波形不受影响，只是不再产生任何刻度。隐藏轴仍保留 `position`，否则 Chart.js 无法从 `axis_vSecV` 这样的 id 推断轴向。
+  - 基准轴 `maxTicksLimit` 由 5 提到 7，刻度更密（0/200/400/600/800/1000 而非 0/500/1000）。
+  - `buildDatasets()`：基准曲线线宽 2.4，其余 1.3，刻度归属一眼可辨。
+  - `refreshChart()`：每帧不再重建整个 `scales` 对象，改为只写 `chart.options.scales.x` 的 `min` / `max`。注意必须经由 Chart.js 的 option 代理赋值——直接改我们自己持有的原始 options 对象无效（已用最小复现验证：原地改写得到 `[0,100]`，经代理赋值得到 `[500,600]`），因为 Chart.js 的 resolver 按对象标识缓存已解析选项。
+  - 图例：每个 chip 增加实时读数（`metric.format(latest)`），点击 chip 即把纵轴切到该信号，`is-reference` 高亮；chip 保持 `<span>` 以免吃掉拖拽排序的 `dragstart`，改用 `role="button"` + `tabindex` + Enter/Space；删除按钮 `stopPropagation`。
+- `AppHostUI/styles/views/telemetry.css`
+  - `.legend-value` 等宽数字、固定最小宽度，读数 20 Hz 刷新时不推挤 chip；`.legend-chip.is-reference` 用信号色描边；`.legend-name` 溢出省略。
+- `AppHostUI/src/i18n/locales/{zh-CN,en}.js`
+  - 新增 `plot.useAsAxis` / `plot.isAxisReference`。
+- `README.md` / `README_zh.md`
+  - 上位机功能条目补充纵轴基准与图例读数。
+
+附带修复：图例 hover 提示被裁掉看不见
+- 现象：图例 chip 的 hover 提示完全看不到。
+- 根因（实测）：`.chart-legend` 为了多信号横向滚动设了 `overflow-x: auto`，按 CSS 规范另一轴的 `visible` 会被强制计算为 `auto`，于是这一行同时成了纵向裁剪盒；图例行只有 42 px 高，提示按 `top: calc(100% + 6px)` 下坠后整体落在盒外被裁掉。裁剪发生在层叠之前，`z-index: 80` 根本没有机会生效——不是被图表盖住。
+- `AppHostUI/styles/base.css`
+  - `[data-tip]` 增加 `@supports (anchor-name) and (anchor-scope)` 分支：提示改为 `position: fixed` + `position-anchor` 锚定，包含块变为视口，任何祖先的 `overflow` 都裁不到它；`position-area: bottom` 保持原来的居中下挂外观，`position-try-fallbacks: flip-block` 在下方空间不足时自动翻到上方。`anchor-scope` 把锚名限制在各自子树内，保证每个提示锚到自己的控件。
+  - 原有 `position: absolute` 规则保留为不支持锚定定位时的回退，无 `@supports` 的浏览器行为不变。
+- 该分支对全站 `[data-tip]` 生效，抽屉等滚动容器内未来新增的提示同样不会被裁。
+
+验证：
+- `node --check` 通过：`telemetry-panel.js`、`chart-selection.js`、`i18n/locales/zh-CN.js`、`i18n/locales/en.js`。
+- 提示可见性验证：目标 Chrome 150 支持 `anchor-name` / `anchor-scope` / `position-area` / `position-try-fallbacks`；图例 chip 到 `<html>` 的祖先链上没有 `transform` / `filter` / `contain` 等会把 fixed 包含块夺走的属性。悬停后实测提示框 `position: fixed`、尺寸正常（如 179×16、193×16），截图确认完整浮在图区之上；顶栏撤销按钮提示位置与改动前一致，无回归。
+- Chrome（Playwright，`file://` 直开）功能验证 11 项全通过：全图恰好一条 Y 轴；1000 V 顶点在该轴上读数为 **1000**（修复前为 1.25）；隐藏轴仍自动缩放；X 窗口持续滚动；每个 chip 有实时读数且恰有一个基准；点击 chip 切换纵轴；刷新后基准信号保持。
+- 边界场景验证 11 项全通过：删除基准信号后纵轴回落到下一条；清空全部信号显示空态且不报错；恢复默认；暂停 + 中英文切换后提示文案正确；一次选中 14 个信号仍只有一条轴；全程控制台零错误。
+
 ## 2026-07-25 Main：同步模块化 HostUI
 
 - 从 release 同步新的常驻命令栏、按 key 的中英文 i18n、分层模块结构、插件系统、实时周期波形修复、固定占空比启动确认与离线校准编辑。

@@ -77,6 +77,8 @@ exports.default = {
   "plot.noSignalsSelected": "No signals selected",
   "plot.selectedCount": "{n} selected",
   "plot.removeSignal": "Remove {name}",
+  "plot.useAsAxis": "Click: scale the Y axis to {name}",
+  "plot.isAxisReference": "Y axis reference -- other curves show shape only",
   "plot.chartMissing": "CHART.JS NOT LOADED",
 
   "signals.title": "Signals",

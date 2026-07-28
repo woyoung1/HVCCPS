@@ -135,6 +135,33 @@ input[type="number"]::-webkit-inner-spin-button {
   pointer-events: none;
 }
 
+/* A tip on a control inside a scrolling box -- the plot legend, a drawer -- is
+   clipped by that box before z-index is ever consulted: `overflow-x: auto`
+   forces `overflow-y` to compute to `auto` as well, so a tip dropping below a
+   42 px legend row is simply cut away. Anchoring pins it to the viewport, which
+   no ancestor's overflow can reach, and flips it above the control when there
+   is no room below. `anchor-scope` keeps each name inside its own subtree so
+   every tip resolves to the control it belongs to. */
+@supports (anchor-name: --tip) and (anchor-scope: --tip) {
+  [data-tip] {
+    anchor-name: --tip;
+    anchor-scope: --tip;
+  }
+
+  [data-tip]:hover::after,
+  [data-tip]:focus-visible::after {
+    position: fixed;
+    position-anchor: --tip;
+    position-area: bottom;
+    position-try-fallbacks: flip-block;
+    top: auto;
+    left: auto;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    transform: none;
+  }
+}
+
 .is-error {
   color: var(--danger);
 }

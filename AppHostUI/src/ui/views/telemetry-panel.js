@@ -4,6 +4,12 @@
 // so nothing that happens elsewhere in the app can resize the chart. The signal
 // picker is an absolutely positioned overlay inside the chart area for the same
 // reason.
+//
+// Exactly ONE Y axis is ever drawn: the one belonging to the reference signal
+// (click a legend chip to move it). Every other curve keeps its own hidden,
+// auto-scaled axis so its shape stays visible, but contributes no ticks -- a
+// number read off the plot can therefore only ever belong to the signal named
+// on the axis. Absolute values for the rest are on the legend chips.
 
 HV.define("ui/views/telemetry-panel", function (require, exports) {
 "use strict";
@@ -36,6 +42,8 @@ function mountTelemetryPanel({ root, device, selection }) {
   let chartNow = performance.now();
   let lastFrameAt = 0;
   let legendVersion = "";
+  /** metric key -> the <span> holding that chip's live reading. */
+  const legendValues = new Map();
 
   const signalPicker = mountSignalPicker({ root: picker, selection });
 
@@ -44,6 +52,7 @@ function mountTelemetryPanel({ root, device, selection }) {
   }
 
   function buildDatasets() {
+    const reference = selection.reference;
     return selection.get().map((metricKey, index) => {
       const metric = METRIC_MAP[metricKey];
       return {
@@ -56,7 +65,9 @@ function mountTelemetryPanel({ root, device, selection }) {
         borderColor: metric.color,
         backgroundColor: metric.color,
         pointRadius: 0,
-        borderWidth: 1.8,
+        // The curve the axis is calibrated to is drawn heavier, so the ticks
+        // read as belonging to it rather than to whichever trace is nearest.
+        borderWidth: metricKey === reference ? 2.4 : 1.3,
         tension: 0.18
       };
     });
@@ -76,23 +87,21 @@ function mountTelemetryPanel({ root, device, selection }) {
       }
     };
 
-    let leftCount = 0;
-    let rightCount = 0;
-    selection.get().forEach((metricKey, index) => {
+    // `position` stays set on the hidden axes too: Chart.js infers the axis
+    // kind from it, and an id like "axis_vSecV" gives it nothing to go on.
+    const reference = selection.reference;
+    for (const metricKey of selection.get()) {
       const metric = METRIC_MAP[metricKey];
-      const position = index % 2 === 0 ? "left" : "right";
-      const offset = position === "left" ? leftCount > 0 : rightCount > 0;
-      if (position === "left") leftCount += 1;
-      else rightCount += 1;
+      const isReference = metricKey === reference;
       scales[axisId(metricKey)] = {
         type: "linear",
-        position,
-        offset,
-        grid: { drawOnChartArea: index === 0, color: "rgba(23, 32, 42, 0.08)" },
-        ticks: { color: metric.color, maxTicksLimit: 5 },
+        position: "left",
+        display: isReference,
+        grid: { drawOnChartArea: isReference, color: "rgba(23, 32, 42, 0.08)" },
+        ticks: { color: metric.color, maxTicksLimit: 7 },
         title: { display: true, text: t(metricAxisKey(metricKey)), color: metric.color }
       };
-    });
+    }
     return scales;
   }
 
@@ -129,10 +138,16 @@ function mountTelemetryPanel({ root, device, selection }) {
     window.requestAnimationFrame(animate);
   }
 
+  /** Scroll the window. Runs every frame, so it must not allocate. */
   function refreshChart() {
     if (!chart) return;
     chartNow = performance.now();
-    chart.options.scales = buildScales();
+    // Assign through Chart.js's option proxy rather than into the object we
+    // built: the proxy is what invalidates the resolver cache, so mutating the
+    // raw options in place would leave the axis frozen at its first range.
+    const x = chart.options.scales.x;
+    x.min = chartNow - CHART_WINDOW_MS;
+    x.max = chartNow;
     chart.update("none");
   }
 
@@ -144,7 +159,7 @@ function mountTelemetryPanel({ root, device, selection }) {
     window.requestAnimationFrame(animate);
   }
 
-  /** Rebuild datasets + axes (selection or language changed). */
+  /** Rebuild datasets + axes (selection, reference or language changed). */
   function syncChartConfig() {
     if (!chart) {
       setHidden(empty, selection.count() > 0);
@@ -158,6 +173,7 @@ function mountTelemetryPanel({ root, device, selection }) {
 
   function renderLegend() {
     const keys = selection.get();
+    legendValues.clear();
     legend.replaceChildren();
     if (keys.length === 0) {
       legend.append(h("span.legend-chip.is-empty", null, t("plot.noSignalsSelected")));
@@ -165,21 +181,39 @@ function mountTelemetryPanel({ root, device, selection }) {
     }
     for (const key of keys) {
       const metric = METRIC_MAP[key];
+      const name = t(metricLabelKey(key));
+      // Clicking the chip calibrates the axis to this signal. The chip stays a
+      // <span> because it is the drag handle for reordering -- a <button> would
+      // swallow the dragstart -- so it carries the button role explicitly.
       const chip = h("span.legend-chip", {
         draggable: true,
+        role: "button",
+        tabindex: "0",
         dataset: { metricKey: key },
-        style: { "--signal-color": metric.color }
+        style: { "--signal-color": metric.color },
+        "data-tip": t("plot.useAsAxis", { name }),
+        onclick: () => selection.setReference(key),
+        onkeydown: (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          selection.setReference(key);
+        }
       });
+      const value = h("span.legend-value");
+      legendValues.set(key, value);
       const remove = h(
         "button.legend-remove",
         {
           type: "button",
-          "aria-label": t("plot.removeSignal", { name: t(metricLabelKey(key)) }),
-          onclick: () => selection.remove(key)
+          "aria-label": t("plot.removeSignal", { name }),
+          onclick: (event) => {
+            event.stopPropagation();
+            selection.remove(key);
+          }
         },
         "×"
       );
-      chip.append(h("span.legend-swatch"), h("span", null, t(metricLabelKey(key))), remove);
+      chip.append(h("span.legend-swatch"), h("span.legend-name", null, name), value, remove);
       chip.addEventListener("dragstart", (event) => {
         event.dataTransfer.setData("text/plain", key);
         event.dataTransfer.effectAllowed = "move";
@@ -227,6 +261,25 @@ function mountTelemetryPanel({ root, device, selection }) {
     if (version !== legendVersion) {
       legendVersion = version;
       renderLegend();
+    }
+
+    // Live readings + which chip owns the axis. Both are per-frame state, so
+    // they are written here rather than by rebuilding the chips.
+    const latest = device.telemetry.latest;
+    const reference = selection.reference;
+    for (const [key, node] of legendValues) {
+      setText(node, METRIC_MAP[key].format(latest));
+      const chip = node.parentNode;
+      const isReference = key === reference;
+      setClass(chip, "is-reference", isReference);
+      setAttr(chip, "aria-pressed", String(isReference));
+      setAttr(
+        chip,
+        "data-tip",
+        isReference
+          ? t("plot.isAxisReference")
+          : t("plot.useAsAxis", { name: t(metricLabelKey(key)) })
+      );
     }
 
     const summary = keys.length === 0 ? t("plot.noSignals") : t("plot.selectedCount", { n: keys.length });

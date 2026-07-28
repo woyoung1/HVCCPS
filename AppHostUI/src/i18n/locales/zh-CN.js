@@ -75,6 +75,8 @@ exports.default = {
   "plot.noSignalsSelected": "未选择信号",
   "plot.selectedCount": "已选择 {n} 项",
   "plot.removeSignal": "移除 {name}",
+  "plot.useAsAxis": "点击：把纵轴刻度切到 {name}",
+  "plot.isAxisReference": "纵轴刻度基准：其余曲线只显示波形",
   "plot.chartMissing": "Chart.js 未加载",
 
   "signals.title": "信号",
