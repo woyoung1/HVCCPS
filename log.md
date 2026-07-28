@@ -24,13 +24,14 @@ ahead of coding. It is the working notebook for the `debug` branch.
   - 基准轴 `maxTicksLimit` 由 5 提到 7，刻度更密（0/200/400/600/800/1000 而非 0/500/1000）。
   - `buildDatasets()`：基准曲线线宽 2.4，其余 1.3，刻度归属一眼可辨。
   - `refreshChart()`：每帧不再重建整个 `scales` 对象，改为只写 `chart.options.scales.x` 的 `min` / `max`。注意必须经由 Chart.js 的 option 代理赋值——直接改我们自己持有的原始 options 对象无效（已用最小复现验证：原地改写得到 `[0,100]`，经代理赋值得到 `[500,600]`），因为 Chart.js 的 resolver 按对象标识缓存已解析选项。
-  - 图例：每个 chip 增加实时读数（`metric.format(latest)`），点击 chip 即把纵轴切到该信号，`is-reference` 高亮；chip 保持 `<span>` 以免吃掉拖拽排序的 `dragstart`，改用 `role="button"` + `tabindex` + Enter/Space；删除按钮 `stopPropagation`。
+  - 图例：点击 chip 即把纵轴切到该信号，`is-reference` 高亮；chip 保持 `<span>` 以免吃掉拖拽排序的 `dragstart`，改用 `role="button"` + `tabindex` + Enter/Space；删除按钮 `stopPropagation`。
+  - chip 上**不放数值**：右侧状态面板已经逐项列出全部读数，图例再放一份只是重复；需要某一时刻的值就悬停曲线，Chart.js tooltip 会给出该点的数值，暂停时同样可用（读的是冻结窗口里的数据），比"暂停瞬间的单个值"更有用。
 - `AppHostUI/styles/views/telemetry.css`
-  - `.legend-value` 等宽数字、固定最小宽度，读数 20 Hz 刷新时不推挤 chip；`.legend-chip.is-reference` 用信号色描边；`.legend-name` 溢出省略。
+  - `.legend-chip.is-reference` 用信号色描边；`.legend-name` 溢出省略。
 - `AppHostUI/src/i18n/locales/{zh-CN,en}.js`
   - 新增 `plot.useAsAxis` / `plot.isAxisReference`。
 - `README.md` / `README_zh.md`
-  - 上位机功能条目补充纵轴基准与图例读数。
+  - 上位机功能条目补充纵轴基准与暂停语义。
 
 附带修复：图例 hover 提示被裁掉看不见
 - 现象：图例 chip 的 hover 提示完全看不到。
@@ -40,10 +41,33 @@ ahead of coding. It is the working notebook for the `debug` branch.
   - 原有 `position: absolute` 规则保留为不支持锚定定位时的回退，无 `@supports` 的浏览器行为不变。
 - 该分支对全站 `[data-tip]` 生效，抽屉等滚动容器内未来新增的提示同样不会被裁。
 
+同轮修复三项曲线交互问题：
+
+1）横轴时间刻度首尾闪烁
+- 现象：滚动时最左（`-16s`~`-20s`）和最右（`-1s`~`-4s`）附近的竖向刻度会闪。
+- 根因：X 轴范围每帧右移，而 Chart.js 自动刻度落在**绝对时间**的整数位置上，于是首尾刻度不断跨越窗口边界、反复进出；`toFixed(0)` 又让贴边刻度的标签在相邻整秒之间来回跳。实测同一页面不同帧的标签分别为 `-20s -13s -8s 0s` / `-20s -14s -9s 0s` / `-20s -12s -7s 0s`——刻度集合逐帧在变。
+- `AppHostUI/src/ui/views/telemetry-panel.js`
+  - X 轴改用 `afterBuildTicks` 固定生成**相对窗口**的刻度：`chartNow - k * X_TICK_STEP_MS`（步长 4 s，窗口 20 s 正好 6 格）。网格线像素位置恒定、标签恒为 `-20s -16s -12s -8s -4s 0s`，数据在其下滑动，闪烁从原理上不再可能。
+
+2）暂停后新增信号会跳到最新时刻
+- 根因：`refreshChart()` 无条件 `chartNow = performance.now()`。暂停时数据是冻结的，但增删信号 / 切换基准轴 / 切换语言都会经 `syncChartConfig()` 调到它，把窗口推到当前时刻，冻结的数据整体被甩到左边界之外，看起来就是"强制同步到最新然后丢弃"。
+- `AppHostUI/src/ui/views/telemetry-panel.js`
+  - `refreshChart()` 仅在未暂停时推进 `chartNow`；暂停期间任何重绘都渲染同一段区间。
+- `AppHostUI/src/device/telemetry.js`
+  - `setPaused()` 只切显示状态，`latest` 始终保持实时，状态面板 / 保护 / 插件不会跟着停在过去。冻结窗口内某一时刻的值通过悬停曲线读取。
+
+3）暂停再恢复后中间的包没有渲染
+- 根因：`sample()` 里 `paused` 会直接 return，暂停期间根本不采样，恢复后曲线断了一截。
+- `AppHostUI/src/device/telemetry.js`
+  - 暂停只冻结**显示**，不再中断采样。`sample()` 去掉 `paused` 早退；保留窗口按暂停状态切换：未暂停按 `CHART_WINDOW_MS`（20 s）裁剪，暂停时按 `PAUSE_RETENTION_MS`（120 s）裁剪，既让冻结窗口在暂停期间不被裁掉（支撑第 2 点"当时的值"），又给内存一个上界。
+- `README.md` / `README_zh.md`：补充暂停只冻结显示、采样不中断。
+
 验证：
 - `node --check` 通过：`telemetry-panel.js`、`chart-selection.js`、`i18n/locales/zh-CN.js`、`i18n/locales/en.js`。
 - 提示可见性验证：目标 Chrome 150 支持 `anchor-name` / `anchor-scope` / `position-area` / `position-try-fallbacks`；图例 chip 到 `<html>` 的祖先链上没有 `transform` / `filter` / `contain` 等会把 fixed 包含块夺走的属性。悬停后实测提示框 `position: fixed`、尺寸正常（如 179×16、193×16），截图确认完整浮在图区之上；顶栏撤销按钮提示位置与改动前一致，无回归。
-- Chrome（Playwright，`file://` 直开）功能验证 11 项全通过：全图恰好一条 Y 轴；1000 V 顶点在该轴上读数为 **1000**（修复前为 1.25）；隐藏轴仍自动缩放；X 窗口持续滚动；每个 chip 有实时读数且恰有一个基准；点击 chip 切换纵轴；刷新后基准信号保持。
+- 曲线交互三项验证（先跑满 22 s 填满整个 20 s 窗口再测）全部通过：连续 90 帧采集横轴刻度标签，只有 1 种取值 `-20s,-16s,-12s,-8s,-4s,0s`，刻度个数恒为 6；暂停后经真实信号选择器加入"占空比"，窗口漂移 0 ms、该信号在冻结窗口内有 998 个点、其轴按这段历史缩放到 `[0,25]`，窗口右边界仍停在暂停时刻（该处 225.6 V，此时实时值已到 273 V）；恢复后窗口内最大采样间隔 48 ms（约等于 20 ms 采样周期，而非 4.6 s 的暂停时长），窗口填充 19980 / 20000 ms；全程控制台零错误。
+- 前两轮用例复跑无回归：纵轴基准 11 项、边界场景 10 项全部通过。
+- Chrome（Playwright，`file://` 直开）功能验证 11 项全通过：全图恰好一条 Y 轴；1000 V 顶点在该轴上读数为 **1000**（修复前为 1.25）；隐藏轴仍自动缩放；X 窗口持续滚动；chip 不重复显示数值且恰有一个基准；点击 chip 切换纵轴；刷新后基准信号保持。
 - 边界场景验证 11 项全通过：删除基准信号后纵轴回落到下一条；清空全部信号显示空态且不报错；恢复默认；暂停 + 中英文切换后提示文案正确；一次选中 14 个信号仍只有一条轴；全程控制台零错误。
 
 ## 2026-07-25 Main：同步模块化 HostUI

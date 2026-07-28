@@ -22,7 +22,7 @@
   align-items: center;
   gap: 6px;
   flex: 0 0 auto;
-  max-width: 280px;
+  max-width: 220px;
   height: 26px;
   padding: 0 6px;
   border: 1px solid var(--line);
@@ -48,21 +48,6 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-
-/* Fixed-width tabular slot: the reading changes 20x a second and must not
-   shuffle the chips sideways while it does. */
-.legend-value {
-  flex: 0 0 auto;
-  min-width: 74px;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  color: var(--muted);
-}
-
-.legend-chip.is-reference .legend-value {
-  color: var(--text);
 }
 
 .legend-swatch {

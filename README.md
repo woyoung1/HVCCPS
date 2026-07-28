@@ -278,7 +278,7 @@ First-time users should watch the [host connection and control video tutorial](h
 - A fixed command bar for start/stop control and live CV, CC, and CP target updates without resetting a timed run
 - Fixed-duty debugging with an explicit confirmation dialog before the open-loop command is sent
 - Voltage, current, power, temperature, and protection-state telemetry
-- Real-time plots and single-cycle sampled waveforms (the Y axis is calibrated to the reference signal, switched by clicking a legend chip; the legend also carries each signal's live reading)
+- Real-time plots and single-cycle sampled waveforms (the Y axis is calibrated to the reference signal, switched by clicking a legend chip; pausing freezes the view only, sampling continues so the trace stays continuous on resume)
 - Configuration of PI parameters, switching frequency, automatic frequency control, and soft start
 - Management of front-panel A/B button presets
 - Chinese/English switching without moving the command or navigation controls

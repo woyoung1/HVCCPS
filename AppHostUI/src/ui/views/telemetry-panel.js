@@ -9,7 +9,8 @@
 // (click a legend chip to move it). Every other curve keeps its own hidden,
 // auto-scaled axis so its shape stays visible, but contributes no ticks -- a
 // number read off the plot can therefore only ever belong to the signal named
-// on the axis. Absolute values for the rest are on the legend chips.
+// on the axis. Absolute values live in the status panel; point-in-time values,
+// including anywhere inside a frozen window, come from hovering the curve.
 
 HV.define("ui/views/telemetry-panel", function (require, exports) {
 "use strict";
@@ -25,6 +26,9 @@ const { mountSignalPicker } = require("ui/views/signal-picker");
 
 const log = createLogger("plot");
 const FRAME_MIN_MS = 1000 / 60;
+/** Spacing of the time ticks. The window is a whole multiple of this, so the
+ *  ticks come out as round relative seconds. */
+const X_TICK_STEP_MS = 4000;
 
 function mountTelemetryPanel({ root, device, selection }) {
   const canvas = qs(root, '[data-el="canvas"]');
@@ -42,8 +46,6 @@ function mountTelemetryPanel({ root, device, selection }) {
   let chartNow = performance.now();
   let lastFrameAt = 0;
   let legendVersion = "";
-  /** metric key -> the <span> holding that chip's live reading. */
-  const legendValues = new Map();
 
   const signalPicker = mountSignalPicker({ root: picker, selection });
 
@@ -80,9 +82,21 @@ function mountTelemetryPanel({ root, device, selection }) {
         min: chartNow - CHART_WINDOW_MS,
         max: chartNow,
         grid: { color: "rgba(23, 32, 42, 0.08)" },
+        // Ticks are pinned to the window instead of to absolute time. Auto
+        // ticks sit at round absolute timestamps, so on a window that slides
+        // every frame the end ones keep crossing the edge -- they blink in and
+        // out, and the rounded labels next to them jitter. Fixed relative
+        // offsets give steady gridlines and labels that never change.
+        afterBuildTicks: (axis) => {
+          const ticks = [];
+          for (let offset = CHART_WINDOW_MS; offset >= 0; offset -= X_TICK_STEP_MS) {
+            ticks.push({ value: chartNow - offset });
+          }
+          axis.ticks = ticks;
+        },
         ticks: {
           color: "#687583",
-          callback: (value) => `${((value - chartNow) / 1000).toFixed(0)}s`
+          callback: (value) => `${Math.round((value - chartNow) / 1000)}s`
         }
       }
     };
@@ -141,7 +155,11 @@ function mountTelemetryPanel({ root, device, selection }) {
   /** Scroll the window. Runs every frame, so it must not allocate. */
   function refreshChart() {
     if (!chart) return;
-    chartNow = performance.now();
+    // While paused the window stays where it froze, so a redraw triggered from
+    // elsewhere -- adding a signal, switching the axis, changing language --
+    // re-renders the same interval instead of jumping to now and leaving the
+    // frozen data behind the left edge.
+    if (!device.telemetry.paused) chartNow = performance.now();
     // Assign through Chart.js's option proxy rather than into the object we
     // built: the proxy is what invalidates the resolver cache, so mutating the
     // raw options in place would leave the axis frozen at its first range.
@@ -173,7 +191,6 @@ function mountTelemetryPanel({ root, device, selection }) {
 
   function renderLegend() {
     const keys = selection.get();
-    legendValues.clear();
     legend.replaceChildren();
     if (keys.length === 0) {
       legend.append(h("span.legend-chip.is-empty", null, t("plot.noSignalsSelected")));
@@ -199,8 +216,6 @@ function mountTelemetryPanel({ root, device, selection }) {
           selection.setReference(key);
         }
       });
-      const value = h("span.legend-value");
-      legendValues.set(key, value);
       const remove = h(
         "button.legend-remove",
         {
@@ -213,7 +228,7 @@ function mountTelemetryPanel({ root, device, selection }) {
         },
         "×"
       );
-      chip.append(h("span.legend-swatch"), h("span.legend-name", null, name), value, remove);
+      chip.append(h("span.legend-swatch"), h("span.legend-name", null, name), remove);
       chip.addEventListener("dragstart", (event) => {
         event.dataTransfer.setData("text/plain", key);
         event.dataTransfer.effectAllowed = "move";
@@ -263,13 +278,12 @@ function mountTelemetryPanel({ root, device, selection }) {
       renderLegend();
     }
 
-    // Live readings + which chip owns the axis. Both are per-frame state, so
-    // they are written here rather than by rebuilding the chips.
-    const latest = device.telemetry.latest;
+    // Which chip owns the axis is per-frame state, so it is written here rather
+    // than by rebuilding the chips (a rebuild would drop keyboard focus).
     const reference = selection.reference;
-    for (const [key, node] of legendValues) {
-      setText(node, METRIC_MAP[key].format(latest));
-      const chip = node.parentNode;
+    for (const chip of legend.children) {
+      const key = chip.dataset.metricKey;
+      if (!key) continue;
       const isReference = key === reference;
       setClass(chip, "is-reference", isReference);
       setAttr(chip, "aria-pressed", String(isReference));
