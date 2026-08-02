@@ -174,7 +174,7 @@ flowchart LR
 当前项目的变压器是在淘宝店铺“[祥润电子磁芯骨架](https://shop339657327.taobao.com)”定做打样的。
 
 > [!NOTE]
-> 变压器打样后漏感应小于10uH，励磁电感应大于300uH。
+> 变压器打样后漏感应小于 10 µH，励磁电感应大于 300 µH。
 
 ### 4.3 BOM 与关键器件
 
@@ -186,12 +186,12 @@ flowchart LR
 | 位号 | 器件/建议 | 注意事项 |
 |---|---|---|
 | L1 | [参考链接](https://item.taobao.com/item.htm?id=524929973196) | — |
-| R8 | 10 kΩ NTC，B = 3450 K（[参考链接](https://detail.tmall.com/item.htm?id=610279139920)） | 注意B值 |
+| R8 | 10 kΩ NTC，B = 3450 K（[参考链接](https://detail.tmall.com/item.htm?id=610279139920)） | 注意核对 B 值 |
 | Q1–Q4 | CSD18540 或 CSD19531 | 注意管子来源 |
 | R24–R28 | Viking（光颉）高压电阻，2 MΩ、2512、3000 V（[参考链接](https://item.taobao.com/item.htm?id=987002402599)） | — |
 | U7、U8 | UCC27211；可替换为 SLM27211 | 市面上 UCC27211 假货较多，SLM27211 可 Pin-to-Pin 替换 |
-| U9 | EE8.3 1:200电流互感器（[参考链接](https://item.taobao.com/item.htm?id=721406076659)） | 注意是1:200，而不是1:100 |
-| U6 | ACS712-20A | 注意是20A量程的版本，不是30A |
+| U9 | EE8.3 1:200 电流互感器（[参考链接](https://item.taobao.com/item.htm?id=721406076659)） | 注意是 1:200，而不是 1:100 |
+| U6 | ACS712-20A | 注意是 20 A 量程的版本，不是 30 A |
 
 其余元器件请按照 BOM 采购。
 
@@ -271,20 +271,25 @@ flowchart LR
 
 ### 6.1 电源控制上位机
 
-推荐下载工程后打开 [`AppHostUI/index.html`](AppHostUI/index.html) 离线使用；也可以直接打开[在线电源控制上位机](https://azidopp.github.io/HVCCPS-V1.4/AppHostUI/)。页面通过 WebSerial 提供以下功能：
+推荐下载工程后用 Chrome 或 Edge 直接打开 [`AppHostUI/index.html`](AppHostUI/index.html) 离线使用，无需构建步骤和网络连接；也可以直接打开[在线电源控制上位机](https://azidopp.github.io/HVCCPS-V1.4/AppHostUI/)。通过 `file://` 打开时，浏览器无法持久保存串口授权，重新打开页面后需要再次选择串口；如果希望保留授权，可以用 `http://127.0.0.1` 提供该目录。
 
 首次使用建议先观看：[上位机连接与控制视频教程](https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/videos-v1.4/HVCCPS-V1.4-Host-Control-Tutorial.mp4)。
 
-- 启停控制及 CV、CC、CP 目标设置
-- 固定占空比调试
+- 固定命令栏，负责启停控制以及 CV、CC、CP 目标的实时更新，定时运行过程中修改目标不会重置计时
+- 固定占空比调试，发送开环指令前会弹出显式确认对话框
 - 电压、电流、功率、温度和保护状态遥测
 - 实时曲线及单周期采样波形（纵轴刻度对准所选基准信号，点击图例即可切换；暂停只冻结显示，采样不中断，恢复后曲线连续）
 - PI、开关频率、自动变频及软启动参数配置
 - 前面板 A/B 按键预设管理
+- 中英文切换，命令栏与导航控件的位置不会移动
+- Tools 区域提供运行摘要、帧检查和声明式自动测试序列
+- 校准表可离线编辑与预览，只有写入或启用校准时才需要连接设备
 
 ![hostui](Docs/hostui.png)
 
 连接参数为 **115200 baud、8N1**。建议使用最新版 Chrome 或 Edge，并一次只打开一个占用该串口的页面。
+
+上位机仍然是纯 HTML/CSS/JavaScript，但实现已拆分为 `AppHostUI/src/` 下的 `core`、`protocol`、`device`、`ui` 和 `plugins` 分层。`AppHostUI/src/loader.js` 提供了一个小型的 `HV.define()` / `HV.require()` 注册表，因此模块化源码仍然可以通过普通 script 标签从 `file://` 加载。扩展可以通过插件宿主注册工具面板和状态芯片，测试或回放工具可以使用受支持的 `window.HVCCPS` API。
 
 ### 6.2 输出校准步骤
 
