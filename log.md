@@ -96,7 +96,9 @@ ahead of coding. It is the working notebook for the `debug` branch.
 
 - 三个图标先合成为 24 单位画布的方块（哔哩哔哩 `#00A1D6` 底、QQ `#12B7F5` 底、GitHub 用按钮同色 `#0f2b46` 底），再渲染成 256×256 PNG 上传。GitHub 那个原本是白色透明底，一旦平台把 alpha 拍到白底就会消失，改成与按钮同色的底块后无论如何都可见，且贴在按钮上看不出边界。
 - 图标块自带底色后，行内条外层 `<span>` 的 `background` 去掉，`<img>` 尺寸由 15 px 改为 24 px 填满原来的色块位置；GitHub 按钮内图标改为 19 px，使字形高度与原来的 15 px 白色字形接近。
-- 徽章一度也改为自托管静态 PNG（静态 shields SVG → 8 倍渲染 → 上传），随后实测立创允许 `img.shields.io` 外链图片，**已回退为原来的动态徽章**：粉丝数与 last-commit 恢复实时。结论是限制只针对 base64 内联图片，不针对外链图片；自托管的三张静态徽章图留在图床里未被引用。
+- 徽章一度也改为自托管静态 PNG（静态 shields SVG → 8 倍渲染 → 上传），随后实测立创允许 `img.shields.io` 外链图片，**已回退为原来的动态徽章**：粉丝数与 last-commit 恢复实时。自托管的三张静态徽章图留在图床里未被引用。
+
+  更准确的结论（第五轮实测）：平台放行的是**它自己解析 markdown 生成的** `<img>`，手写的外链 `<img src="https://img.shields.io/…">` 会被清洗掉；base64 内联图片同样不行。所以外链图必须写成 markdown 图片语法，平台侧图片（`image.lceda.cn`）用 HTML `<img>` 正常。
 
 其它改动：
 
@@ -107,8 +109,32 @@ ahead of coding. It is the working notebook for the `debug` branch.
 
 说明：探测字段名时对 QQ 图标重复上传了 3 次（成功 3 个 URL，实际只用第 1 个），账号图床里会多出 2 张同样的孤儿图片，不影响页面。本轮保留了用户自己在文件里做的修改（标题、目录条目描述等），未回退。
 
+### 追加：同日第五轮——在 HTML 版式里嵌入 markdown 徽章
+
+手写 `<img>` 引外链图会被立创清洗，markdown 图片语法则能渲染。要在**不动现有背景与版式**的前提下换成 markdown，用的是 CommonMark 的块级规则：
+
+- HTML 块遇**空行**结束，空行之后的内容重新按 markdown 解析，再空一行即可继续写 HTML。于是在报头右侧那个 flex 单元格的开标签之后插入空行，写三行 markdown 徽章，再空行接 `</div>`。
+- 空行之后的行**缩进必须 ≤3 空格**，否则会被当成缩进代码块。因此 markdown 徽章顶格写，其后的 `</div>` 用 2 空格缩进（缩进只是排版，不影响 DOM 嵌套）。
+- markdown 生成的图片被包在 `<p>` 里，而平台样式是 `.markdown-body p{line-height:inherit;margin-top:22px;margin-bottom:22px}`（从 `static.oshwhub.com` 的 CSS bundle 里查到的实际规则）。直接放进 flex 行会把徽章顶偏 22 px。解决办法是把徽章单元格写成 `display: flex; align-items: center; height: 20px;`：`<p>` 作为 flex item 被按**外边距框**居中，上下 22 px 对称正好抵消，单元格对外仍然只有 20 px 高，因此报头的对齐关系完全不变。这个写法对 `margin: 0`（编辑器预览用的 `.tinymce-content p`）同样成立，不依赖具体数值。
+
+验证手段相应升级：原来的预览脚本是直接把 `.md` 当 HTML 塞进浏览器，现在文件里含 markdown 语法，必须先过解析器。新增 `platform.js`——`markdown-it`（html: true）渲染 → 套上从平台 CSS bundle 里抓到的 `.markdown-body` 规则 → Chrome 载入测量，即模拟立创的实际渲染链路。
+
+**第一版的错**：把徽章塞进报头 flex 行、用 `height: 20px` 的格子去抵消 `<p>` 的外边距，实际页面上徽章压住了标题、也压住了下面的行内条。原因在平台 CSS 里：`.bytemd-preview .markdown-body{max-width:800px}`——编辑器预览只有 800 px 宽，报头「标题 420 px + 徽章约 330 px」放不下就换行；换行后那个 20 px 高的格子里装着 22+27+22 = 71 px 的 `<p>`，上下各溢出约 25 px，正好盖住上方标题与下方行内条。教训是**不要用固定高度去藏一个会溢出的段落**：只要容器宽度变化就会翻车。
+
+改成不依赖溢出的写法：徽章单独成块、放在标题下方，用 `text-align: right` 让它靠右（`text-align` 会继承进生成的 `<p>`，而 `border`/`margin` 不会），块本身用 `margin: -14px 0 -8px` 把 22 px 的段落外边距收紧到 8 px 和 14 px。即使外边距为 0 也只是贴紧，不会重叠。
+
+### 追加：多尺寸适配（手机 / 平板 / 桌面 / iframe 嵌套）
+
+`platform.js` 扩成宽度扫描，7 个断点各跑一遍并自动判定：横向滚动、徽章与标题 / 行内条 / 按钮的**矩形相交**、超出视口的元素、误判代码块、坏图。同时把平台对表格和链接的规则也纳入模拟（此前只模拟了 `p` 和 `img`）：
+
+- `.markdown-body table{display:inline-block!important;max-width:100%;overflow:auto;font-size:12px}`、`td{min-width:120px}`、`td,th{padding:12px 7px!important}`——平台会接管我们所有的 `<table>`，窄屏下表格**内部横向滚动**而不是撑破页面，这是平台的既定行为，不需要也无法用内联样式对抗（`!important` 声明胜过内联非 important）。
+- `.markdown-body a{border-bottom:1px solid #d1e9ff}`——平台给所有链接加浅蓝下划线。行内条和按钮因为内联写了 `border` 简写不受影响；目录 8 个条目原本没写下边框，会被平台画成浅蓝线，与设计里的 `#eef2f6` 分隔线不一致，补 `border-bottom: none` 覆盖。
+- 手机宽度下行内条会逐字断行（平台 `word-break: break-word` 叠加窄容器，出现「项目说明视 频」）。改为每段文字 `white-space: nowrap`、行内条自身 `flex-wrap: wrap`：整段要么在同一行，要么整段折到下一行，不再从词中间断开。
+
 ### 验证
 
+- 平台链路模拟（markdown-it + `.markdown-body` CSS + Chrome）扫描 7 个宽度：**375 / 414 / 560（iframe 窄）/ 768 / 820（ByteMD 预览）/ 1024 / 1280**。全部：横向滚动 = 否，徽章与标题 / 行内条 / 按钮相交 = 0，`<pre>` 误判 = 0，坏图 = 0，三个徽章均加载成功。375 px 下徽章自动折成两行、行内条折成两行，均无重叠。
+- 逐宽度截图核对报头、行内条、目录、镜像卡在各尺寸下的表现。
 - 结构校验：716 个 `style=` 全部闭合；标签配对无错配、无未闭合（提示块批量改写后专门复查过每块的闭合 `</div>`）；文件内已无残留 markdown 语法；13 处提示块全部带 `border-radius: 0 10px 10px 0`。
 - Playwright + 系统 Chrome 渲染 `file://` 预览（视口 1100 px）：0 个请求失败，0 个横向溢出元素，0 张坏图，全页高度 20125 px。
 - **图片来源审计**：全文 37 个 `<img>`，`data:` / `base64` 出现次数为 0；`src` 主机只有 `image.lceda.cn`（34 张，自托管）和 `img.shields.io`（3 个动态徽章，实测允许）。外链 `href`（GitHub、哔哩哔哩、淘宝、加群链接等）保持不变。

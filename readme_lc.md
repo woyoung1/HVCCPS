@@ -1,30 +1,30 @@
 <div style="max-width: 1040px; margin: 20px auto 40px; padding: 26px 26px 32px; background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 55%, #e9eef4 100%); border: 1px solid #dbe2ea; color: #1c2733; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; font-size: 15px; line-height: 1.85;">
 
-  <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 18px; padding: 0 0 14px; margin: 0 0 18px; border-bottom: 2px solid #0f2b46;">
-    <div style="flex: 1 1 420px;">
-      <div style="margin: 8px 0 0; font-size: 31px; line-height: 1.2; font-weight: 800; color: #0f2b46; letter-spacing: 0.5px;">HVCCPS<span style="font-weight: 400; color: #5d6b7a;"> / 1.4</span></div>
-    </div>
-    <div style="flex: 0 1 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 6px;">
-      <a href="https://space.bilibili.com/1084866085"><img src="https://img.shields.io/badge/dynamic/json?color=blue&amp;label=BiliBili&amp;labelColor=white&amp;query=$.data.follower&amp;url=https://api.bilibili.com/x/relation/stat?vmid=1084866085&amp;logo=bilibili" alt="Bilibili followers" style="display: block; height: 20px;"></a>
-      <a href="https://www.youtube.com/@lyyontop"><img src="https://img.shields.io/badge/YouTube-white?logo=youtube&amp;logoColor=FF0000" alt="YouTube" style="display: block; height: 20px;"></a>
-      <a href="https://github.com/AzidoPP/HVCCPS-V1.4"><img src="https://img.shields.io/github/last-commit/AzidoPP/HVCCPS-V1.4?color=yellow&amp;logo=github&amp;labelColor=black&amp;label=Latest" alt="GitHub last commit" style="display: block; height: 20px;"></a>
-    </div>
+  <div style="padding: 0 0 10px; margin: 0 0 18px; border-bottom: 2px solid #0f2b46;">
+    <div style="margin: 8px 0 0; font-size: 31px; line-height: 1.2; font-weight: 800; color: #0f2b46; letter-spacing: 0.5px;">HVCCPS<span style="font-weight: 400; color: #5d6b7a;"> / 1.4</span></div>
+  <div style="text-align: right; margin: -14px 0 -8px;">
+
+[![Bilibili followers](https://img.shields.io/badge/dynamic/json?color=blue&label=BiliBili&labelColor=white&query=$.data.follower&url=https://api.bilibili.com/x/relation/stat?vmid=1084866085&logo=bilibili)](https://space.bilibili.com/1084866085)
+[![YouTube](https://img.shields.io/badge/YouTube-white?logo=youtube&logoColor=FF0000)](https://www.youtube.com/@lyyontop)
+[![GitHub last commit](https://img.shields.io/github/last-commit/AzidoPP/HVCCPS-V1.4?color=yellow&logo=github&labelColor=black&label=Latest)](https://github.com/AzidoPP/HVCCPS-V1.4)
+
+  </div>
   </div>
 
   <div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px;">
-    <a href="https://www.bilibili.com/video/BV1GMjm6cExY" style="display: inline-flex; align-items: center; gap: 9px; padding: 6px 13px 6px 6px; border: 1px solid #c4cfdb; background: #fff; box-shadow: 0 1px 2px rgba(15, 43, 70, 0.05); text-decoration: none;">
+    <a href="https://www.bilibili.com/video/BV1GMjm6cExY" style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 9px; padding: 6px 13px 6px 6px; border: 1px solid #c4cfdb; background: #fff; box-shadow: 0 1px 2px rgba(15, 43, 70, 0.05); text-decoration: none;">
       <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: 0 0 auto;"><img src="https://image.lceda.cn/oshwhub/pullImage/e0aaf1a9f97c4bee92cdcb4c56740321.png" alt="bilibili" style="display: block; width: 24px; height: 24px;"></span>
-      <span style="font-size: 11.5px; letter-spacing: 1.2px; color: #5d6b7a; font-weight: 700;">项目说明视频</span>
+      <span style="white-space: nowrap; font-size: 11.5px; letter-spacing: 1.2px; color: #5d6b7a; font-weight: 700;">项目说明视频</span>
       <span style="display: inline-block; width: 1px; height: 14px; background: #dbe2ea;"></span>
-      <span style="font-size: 14px; font-weight: 700; color: #0b5394;">在哔哩哔哩观看</span>
-      <span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12.5px; color: #8b98a6;">BV1GMjm6cExY</span>
+      <span style="white-space: nowrap; font-size: 14px; font-weight: 700; color: #0b5394;">在哔哩哔哩观看</span>
+      <span style="white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12.5px; color: #8b98a6;">BV1GMjm6cExY</span>
     </a>
-    <a href="https://qm.qq.com/cgi-bin/qm/qr?k=U15RQv8VwsERoqETaxclwMHfQLXMy5bm&amp;jump_from=webapi&amp;authKey=VQZK3yUXLKCXNU/Ks7zijN5xAWnJcITG0IbZqDjHvjMfUPCw6yo3FUB/QfBIWcmR" target="_blank" style="display: inline-flex; align-items: center; gap: 9px; padding: 6px 13px 6px 6px; border: 1px solid #c4cfdb; background: #fff; text-decoration: none; box-shadow: 0 1px 2px rgba(15, 43, 70, 0.05);">
+    <a href="https://qm.qq.com/cgi-bin/qm/qr?k=U15RQv8VwsERoqETaxclwMHfQLXMy5bm&amp;jump_from=webapi&amp;authKey=VQZK3yUXLKCXNU/Ks7zijN5xAWnJcITG0IbZqDjHvjMfUPCw6yo3FUB/QfBIWcmR" target="_blank" style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 9px; padding: 6px 13px 6px 6px; border: 1px solid #c4cfdb; background: #fff; text-decoration: none; box-shadow: 0 1px 2px rgba(15, 43, 70, 0.05);">
       <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: 0 0 auto;"><img src="https://image.lceda.cn/oshwhub/pullImage/ecabe349f4b44925b1255d1691560712.png" alt="QQ 群" style="display: block; width: 24px; height: 24px;"></span>
-      <span style="font-size: 11.5px; letter-spacing: 1.2px; color: #5d6b7a; font-weight: 700;">QQ 交流群</span>
+      <span style="white-space: nowrap; font-size: 11.5px; letter-spacing: 1.2px; color: #5d6b7a; font-weight: 700;">QQ 交流群</span>
       <span style="display: inline-block; width: 1px; height: 14px; background: #dbe2ea;"></span>
-      <span style="font-size: 14px; font-weight: 700; color: #0b5394;">点击加群</span>
-      <span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 14px; font-weight: 700; color: #0f2b46; letter-spacing: 0.5px;">582594264</span>
+      <span style="white-space: nowrap; font-size: 14px; font-weight: 700; color: #0b5394;">点击加群</span>
+      <span style="white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 14px; font-weight: 700; color: #0f2b46; letter-spacing: 0.5px;">582594264</span>
     </a>
   </div>
 
@@ -52,14 +52,14 @@
   <div style="border: 1px solid #d5dde6; background: #fff; padding: 4px 0; margin: 0 0 10px; box-shadow: 0 1px 2px rgba(15, 43, 70, 0.06);">
     <div style="padding: 10px 16px 8px; font-size: 11.5px; letter-spacing: 1.6px; color: #5d6b7a; font-weight: 800;">目录</div>
     <div style="display: flex; flex-wrap: wrap;">
-      <a href="#intro" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">一、</span><span style="color: #0f2b46; font-weight: 700;">项目简介</span><span style="color: #5d6b7a; font-size: 13px;"> · 概述</span></a>
-      <a href="#specs" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">二、</span><span style="color: #0f2b46; font-weight: 700;">技术参数</span><span style="color: #5d6b7a; font-size: 13px;"> · 电气、保护、通信、高压侧</span></a>
-      <a href="#arch" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">三、</span><span style="color: #0f2b46; font-weight: 700;">架构</span><span style="color: #5d6b7a; font-size: 13px;"> · PCB、电源、硬件、控制策略</span></a>
-      <a href="#build" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">四、</span><span style="color: #0f2b46; font-weight: 700;">制作与装配</span><span style="color: #5d6b7a; font-size: 13px;"> · 制板、变压器、BOM、焊接</span></a>
-      <a href="#firmware" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">五、</span><span style="color: #0f2b46; font-weight: 700;">固件烧录与 IAP</span><span style="color: #5d6b7a; font-size: 13px;"> · 固件组成、烧录步骤</span></a>
-      <a href="#hostui" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">六、</span><span style="color: #0f2b46; font-weight: 700;">上位机</span><span style="color: #5d6b7a; font-size: 13px;"> · 电源控制、输出校准、Bootloader</span></a>
-      <a href="#test" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">七、</span><span style="color: #0f2b46; font-weight: 700;">测试</span><span style="color: #5d6b7a; font-size: 13px;"> · ZVS、波形、启动、纹波、整机</span></a>
-      <a href="#license" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">八、</span><span style="color: #0f2b46; font-weight: 700;">许可证与修改记录</span><span style="color: #5d6b7a; font-size: 13px;"> · GPL-3.0、log.md</span></a>
+      <a href="#intro" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-bottom: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">一、</span><span style="color: #0f2b46; font-weight: 700;">项目简介</span><span style="color: #5d6b7a; font-size: 13px;"> · 概述</span></a>
+      <a href="#specs" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-bottom: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">二、</span><span style="color: #0f2b46; font-weight: 700;">技术参数</span><span style="color: #5d6b7a; font-size: 13px;"> · 电气、保护、通信、高压侧</span></a>
+      <a href="#arch" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-bottom: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">三、</span><span style="color: #0f2b46; font-weight: 700;">架构</span><span style="color: #5d6b7a; font-size: 13px;"> · PCB、电源、硬件、控制策略</span></a>
+      <a href="#build" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-bottom: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">四、</span><span style="color: #0f2b46; font-weight: 700;">制作与装配</span><span style="color: #5d6b7a; font-size: 13px;"> · 制板、变压器、BOM、焊接</span></a>
+      <a href="#firmware" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-bottom: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">五、</span><span style="color: #0f2b46; font-weight: 700;">固件烧录与 IAP</span><span style="color: #5d6b7a; font-size: 13px;"> · 固件组成、烧录步骤</span></a>
+      <a href="#hostui" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-bottom: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">六、</span><span style="color: #0f2b46; font-weight: 700;">上位机</span><span style="color: #5d6b7a; font-size: 13px;"> · 电源控制、输出校准、Bootloader</span></a>
+      <a href="#test" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-bottom: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">七、</span><span style="color: #0f2b46; font-weight: 700;">测试</span><span style="color: #5d6b7a; font-size: 13px;"> · ZVS、波形、启动、纹波、整机</span></a>
+      <a href="#license" style="flex: 1 1 460px; display: block; padding: 9px 16px; text-decoration: none; border-bottom: none; border-top: 1px solid #eef2f6;"><span style="font-family: ui-monospace, SFMono-Regular, Consolas, monospace; color: #8b98a6; font-weight: 700; margin-right: 2px;">八、</span><span style="color: #0f2b46; font-weight: 700;">许可证与修改记录</span><span style="color: #5d6b7a; font-size: 13px;"> · GPL-3.0、log.md</span></a>
     </div>
   </div>
 
