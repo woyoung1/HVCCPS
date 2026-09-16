@@ -7,7 +7,6 @@
 [![Bilibili followers](https://img.shields.io/badge/dynamic/json?color=blue&label=BiliBili&labelColor=white&query=$.data.follower&url=https://api.bilibili.com/x/relation/stat?vmid=1084866085&logo=bilibili)](https://space.bilibili.com/1084866085)
 [![YouTube](https://img.shields.io/badge/YouTube-white?logo=youtube&logoColor=FF0000)](https://www.youtube.com/@lyyontop)
 [![GitHub last commit](https://img.shields.io/github/last-commit/AzidoPP/HVCCPS-V1.4?color=yellow&logo=github&labelColor=black&label=Latest)](https://github.com/AzidoPP/HVCCPS-V1.4)
-[![Star History Chart](https://api.star-history.com/svg?repos=AzidoPP/HVCCPS-V1.4&type=date&legend=top-left)](https://www.star-history.com/#AzidoPP/HVCCPS-V1.4&type=date&legend=top-left)
 
 📺 **项目说明视频：** [在哔哩哔哩观看](https://www.bilibili.com/video/BV1GMjm6cExY)
 
@@ -21,6 +20,14 @@
 ## 项目热度与支持
 
 如果您觉得本项目对您有帮助，请不吝点亮 Star ⭐
+
+<a href="https://www.star-history.com/?type=date&legend=top-left&repos=AzidoPP%2FHVCCPS-V1.4">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=AzidoPP/HVCCPS-V1.4&type=date&theme=dark&legend=top-left&sealed_token=kDz0hc01DVTS3rF3GAi75EiHxIa9qnTkVolAf1RQfyhLuJzu7Lq5wJ7wNY2gDabwTFjdUDuSl0qtrzFLIxt38RnUDUSFVgwKW00Wjt4meIM9JupOqs69YQ" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=AzidoPP/HVCCPS-V1.4&type=date&legend=top-left&sealed_token=kDz0hc01DVTS3rF3GAi75EiHxIa9qnTkVolAf1RQfyhLuJzu7Lq5wJ7wNY2gDabwTFjdUDuSl0qtrzFLIxt38RnUDUSFVgwKW00Wjt4meIM9JupOqs69YQ" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AzidoPP/HVCCPS-V1.4&type=date&legend=top-left&sealed_token=kDz0hc01DVTS3rF3GAi75EiHxIa9qnTkVolAf1RQfyhLuJzu7Lq5wJ7wNY2gDabwTFjdUDuSl0qtrzFLIxt38RnUDUSFVgwKW00Wjt4meIM9JupOqs69YQ" />
+ </picture>
+</a>
 
 ## 1. 项目简介
 
