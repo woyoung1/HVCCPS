@@ -41,7 +41,7 @@ The PCB was designed in EasyEDA Pro. This repository includes the complete [Easy
 
 ### 1.2 Firmware and license
 
-To discourage closed-source commercial use and closed-source copying, the public repository currently provides compiled firmware only; the firmware source is not included directly in the public branch. The source code is available **free of charge** by joining QQ group **582594264** or emailing **Lanyyontop@gmail.com**.
+To discourage unauthorized closed-source commercial use and closed-source copying, the public repository currently provides compiled firmware only; the firmware source is not included directly in the public branch. The source code is available **free of charge** by joining QQ group **582594264** or emailing **Lanyyontop@gmail.com**.
 
 The public contents of this repository are licensed under [GPL-3.0](LICENSE). When obtaining, modifying, or redistributing the source or derivative works, comply with the license terms.
 
@@ -49,54 +49,54 @@ The public contents of this repository are licensed under [GPL-3.0](LICENSE). Wh
 
 ### 2.1 Electrical specifications
 
-| Parameter | Minimum | Typical | Maximum | Unit | Notes |
-|---|---:|---:|---:|:---:|---|
-| Input voltage (DC) | 18 | 24 | 28 | V | Rated input-voltage range |
-| Input current (DC) | — | — | 20 | A | Rated input current |
-| Output voltage (DC) | 0 | Adjustable | 2200 | V | — |
-| Output current (DC) | 0 | Adjustable | 200 | mA | — |
-| Output power (DC) | 0 | Adjustable | 400 | W | — |
-| Switching frequency | 11 | 35 | 45 | kHz | Automatic frequency control by default; 35 kHz reference frequency |
-| Gate-driver dead time | — | 200 | — | ns | — |
-| Conversion efficiency | — | — | 96 | % | Measured peak; see the [efficiency test data](Test_Data/efficiency-test.txt) |
-| Output-voltage step | — | 1 | — | V | — |
-| Output-current step | — | 1 | — | mA | — |
-| Output-voltage accuracy | — | — | ±0.5 | % | — |
-| Output-current accuracy | — | — | ±1 | % | — |
-| Power density | — | 40 | — | W/in³ | Based on the effective assembled volume |
-| Total weight | — | 292 | — | g | — |
+| Parameter               | Minimum |    Typical | Maximum |  Unit  | Notes                                                                      |
+| ----------------------- | ------: | ---------: | ------: | :----: | -------------------------------------------------------------------------- |
+| Input voltage (DC)      |      18 |         24 |      28 |   V   | Rated input-voltage range                                                  |
+| Input current (DC)      |      — |         — |      20 |   A   | Rated input current                                                        |
+| Output voltage (DC)     |       0 | Adjustable |    2200 |   V   | —                                                                         |
+| Output current (DC)     |       0 | Adjustable |     200 |   mA   | —                                                                         |
+| Output power (DC)       |       0 | Adjustable |     400 |   W   | —                                                                         |
+| Switching frequency     |      11 |         35 |      45 |  kHz  | Automatic frequency control by default; 35 kHz reference frequency         |
+| Gate-driver dead time   |      — |        200 |      — |   ns   | —                                                                         |
+| Conversion efficiency   |      — |         — |      96 |   %   | Measured peak; see the[efficiency test data](Test_Data/efficiency-test.txt) |
+| Output-voltage step     |      — |          1 |      — |   V   | —                                                                         |
+| Output-current step     |      — |          1 |      — |   mA   | —                                                                         |
+| Output-voltage accuracy |      — |         — |   ±0.5 |   %   | —                                                                         |
+| Output-current accuracy |      — |         — |     ±1 |   %   | —                                                                         |
+| Power density           |      — |         40 |      — | W/in³ | Based on the effective assembled volume                                    |
+| Total weight            |      — |        292 |      — |   g   | —                                                                         |
 
 > [!NOTE]
 > The 28 V value is the upper limit of the recommended operating range. The bus capacitors are rated for 35 V; never exceed 35 V.
 
 ### 2.2 Control and protection
 
-| Item | Parameter | Description |
-|---|---|---|
-| Control modes | CV / CC / CP | Automatic arbitration among three PI loops |
-| Fixed-duty mode | 0–100% | For debugging only; still constrained by soft start |
-| Soft start | Duty may increase by at most 10% per control cycle | Default value; adjustable in the host configuration manager |
-| Run timer | Continuous or 1–65534 s | Automatically disables the output when the timer expires |
-| Supply UVLO / OVP | Bus >32 V; window protection for 12 V, 5 V, and 3.3 V rails | Internally suppresses the physical output while preserving software enable state and communications |
-| Hardware overcurrent protection (OCP) | Approximately 60 A AC peak at the primary-side SW node | COMP1 → HRTIM FAULT4 asynchronous shutdown; **this is not a 60 A rated input current** |
-| Software overtemperature protection (OTP) | 70 °C | Shuts down if either the MOSFET NTC or the MCU internal temperature exceeds the threshold |
-| Independent watchdog (IWDG) | Approximately 200 ms | Resets the controller if the main loop or control ISR stalls |
-| Buttons | Two A/B presets | Stores CV, CC, CP, and run time; supports offline operation and shutdown |
+| Item                                      | Parameter                                                   | Description                                                                                         |
+| ----------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Control modes                             | CV / CC / CP                                                | Automatic arbitration among three PI loops                                                          |
+| Fixed-duty mode                           | 0–100%                                                     | For debugging only; still constrained by soft start                                                 |
+| Soft start                                | Duty may increase by at most 10% per control cycle          | Default value; adjustable in the host configuration manager                                         |
+| Run timer                                 | Continuous or 1–65534 s                                    | Automatically disables the output when the timer expires                                            |
+| Supply UVLO / OVP                         | Bus >32 V; window protection for 12 V, 5 V, and 3.3 V rails | Internally suppresses the physical output while preserving software enable state and communications |
+| Hardware overcurrent protection (OCP)     | Approximately 60 A AC peak at the primary-side SW node      | COMP1 → HRTIM FAULT4 asynchronous shutdown;**this is not a 60 A rated input current**        |
+| Software overtemperature protection (OTP) | 70 °C                                                      | Shuts down if either the MOSFET NTC or the MCU internal temperature exceeds the threshold           |
+| Independent watchdog (IWDG)               | Approximately 200 ms                                        | Resets the controller if the main loop or control ISR stalls                                        |
+| Buttons                                   | Two A/B presets                                             | Stores CV, CC, CP, and run time; supports offline operation and shutdown                            |
 
 OCP and OTP both latch the shutdown state. Starting again clears the latch; if the fault condition is still present, protection trips immediately again.
 
 ### 2.3 Controller and communications
 
-| Item | Specification |
-|---|---|
-| MCU | STM32G474CBT6 |
-| External crystal | 8 MHz HSE |
-| System clock | 170 MHz |
-| Communication interface | USART3, PB10 (TX) / PB11 (RX) |
-| Serial format | 115200 baud, 8N1 |
-| Host interface | WebSerial |
-| Input connector | XT30 |
-| High-voltage output connector | M3 |
+| Item                          | Specification                 |
+| ----------------------------- | ----------------------------- |
+| MCU                           | STM32G474CBT6                 |
+| External crystal              | 8 MHz HSE                     |
+| System clock                  | 170 MHz                       |
+| Communication interface       | USART3, PB10 (TX) / PB11 (RX) |
+| Serial format                 | 115200 baud, 8N1              |
+| Host interface                | WebSerial                     |
+| Input connector               | XT30                          |
+| High-voltage output connector | M3                            |
 
 ### 2.4 High-voltage-side design notes
 
@@ -110,8 +110,8 @@ For a higher output voltage, recalculate and validate the transformer turns rati
 
 The PCB uses **4 layers, a 1.6 mm board thickness, and 1 oz copper**. Common resistors and capacitors use 0805 packages for easier assembly. The main power transformer is primarily on the top side; the gate-drive, control, and sensing circuits are primarily on the bottom side.
 
-| Top | Bottom |
-|---|---|
+| Top                          | Bottom                             |
+| ---------------------------- | ---------------------------------- |
 | ![PCB top](Docs/pcb-top.png) | ![PCB bottom](Docs/pcb-bottom.png) |
 
 ### 3.2 Power architecture
@@ -165,20 +165,20 @@ Order the PCB using the [Gerber files](PCB/Gerber_HVCCPS_V1.4.zip) in this repos
 
 ![Transformer manufacturing parameters](Docs/transformer-specification.png)
 
-| Item | Specification |
-|---|---|
-| Core | EC49, material 40 |
-| Turns | 9 primary, 900 secondary |
-| Turns ratio | 1:100 |
-| Primary winding pins | 2–3 |
-| Secondary winding pins | 5–8 |
-| Secondary wire diameter | 0.3 mm |
-| Air gap | None required |
-| Other requirements | Minimize leakage inductance; pot and seal after winding |
+| Item                    | Specification                                           |
+| ----------------------- | ------------------------------------------------------- |
+| Core                    | EC49, material 40                                       |
+| Turns                   | 9 primary, 900 secondary                                |
+| Turns ratio             | 1:100                                                   |
+| Primary winding pins    | 2–3                                                    |
+| Secondary winding pins  | 5–8                                                    |
+| Secondary wire diameter | 0.3 mm                                                  |
+| Air gap                 | None required                                           |
+| Other requirements      | Minimize leakage inductance; pot and seal after winding |
 
 Use the thickest practical wire for the primary winding, with a current capacity of **≥ 30 A**. Before potting, remove pins 1, 4, 6, and 7 plus the two unused center pins. Either winding direction is acceptable.
 
-The transformer used in this project was custom-made by the [Xiangrun Electronic Core & Bobbin Taobao store](https://shop339657327.taobao.com).
+The transformer used in this project was custom-made by the [Xiangrun Electronic Core &amp; Bobbin Taobao store](https://shop339657327.taobao.com).
 
 > [!NOTE]
 > After manufacturing, the transformer should have less than 10 µH leakage inductance and more than 300 µH magnetizing inductance.
@@ -190,15 +190,15 @@ The complete bill of materials is available at [Docs/BOM.xlsx](Docs/BOM.xlsx). P
 > [!IMPORTANT]
 > Use the [Docs/BOM.xlsx](Docs/BOM.xlsx) file provided with this documentation and the key-component notes in this section as the source of truth. Do not use the BOM exported from the Lichuang EDA project.
 
-| Reference | Part / recommendation | Notes |
-|---|---|---|
-| L1 | [Reference link](https://item.taobao.com/item.htm?id=524929973196) | — |
-| R8 | 10 kΩ NTC, B = 3450 K ([reference link](https://detail.tmall.com/item.htm?id=610279139920)) | Check the B value |
-| Q1–Q4 | CSD18540 or CSD19531 | Verify the source of the MOSFETs |
-| R24–R28 | Viking high-voltage resistors, 2 MΩ, 2512, 3000 V ([reference link](https://item.taobao.com/item.htm?id=987002402599)) | — |
-| U7, U8 | UCC27211; SLM27211 is a substitute | Counterfeit UCC27211 devices are common; SLM27211 is a pin-to-pin replacement |
-| U9 | EE8.3 1:200 current transformer ([reference link](https://item.taobao.com/item.htm?id=721406076659)) | Ensure it is 1:200, not 1:100 |
-| U6 | ACS712-20A | Use the 20 A-range version, not the 30 A version |
+| Reference | Part / recommendation                                                                                                  | Notes                                                                         |
+| --------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| L1        | [Reference link](https://item.taobao.com/item.htm?id=524929973196)                                                      | —                                                                            |
+| R8        | 10 kΩ NTC, B = 3450 K ([reference link](https://detail.tmall.com/item.htm?id=610279139920))                            | Check the B value                                                             |
+| Q1–Q4    | CSD18540 or CSD19531                                                                                                   | Verify the source of the MOSFETs                                              |
+| R24–R28  | Viking high-voltage resistors, 2 MΩ, 2512, 3000 V ([reference link](https://item.taobao.com/item.htm?id=987002402599)) | —                                                                            |
+| U7, U8    | UCC27211; SLM27211 is a substitute                                                                                     | Counterfeit UCC27211 devices are common; SLM27211 is a pin-to-pin replacement |
+| U9        | EE8.3 1:200 current transformer ([reference link](https://item.taobao.com/item.htm?id=721406076659))                    | Ensure it is 1:200, not 1:100                                                 |
+| U6        | ACS712-20A                                                                                                             | Use the 20 A-range version, not the 30 A version                              |
 
 Purchase all remaining components according to the BOM.
 
@@ -228,10 +228,10 @@ Solder terminals to the capacitor leads first, then fasten them to the output us
 
 The released firmware consists of two Intel HEX files, available from [GitHub Releases](https://github.com/AzidoPP/HVCCPS-V1.4/releases):
 
-| Firmware | Start address | Purpose |
-|---|---|---|
-| [Bootloader HEX](https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/v0.0.1/HVCCPS_Bootloader_V0.0.1.hex) | `0x08000000` | Startup checks and serial IAP updates |
-| [App HEX](https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/v0.0.2/HVCCPS_App_V0.0.2.hex) | `0x08004000` | Power control, protection, telemetry, and host communication |
+| Firmware                                                                                                      | Start address  | Purpose                                                      |
+| ------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------ |
+| [Bootloader HEX](https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/v0.0.1/HVCCPS_Bootloader_V0.0.1.hex) | `0x08000000` | Startup checks and serial IAP updates                        |
+| [App HEX](https://github.com/AzidoPP/HVCCPS-V1.4/releases/download/v0.0.2/HVCCPS_App_V0.0.2.hex)               | `0x08004000` | Power control, protection, telemetry, and host communication |
 
 ### 5.2 Preparation
 
@@ -252,10 +252,10 @@ Install [STM32 ST-LINK Utility](https://www.st.com/en/development-tools/stsw-lin
 
 The board communication header exposes `SWCLK`, `SWDIO`, `TX`, `RX`, `GND`, `3.3 V`, `SDA`, and `SCL`, in that order. Flashing is performed in two stages:
 
-| Stage | Required pins | Interface |
-|---|---|---|
-| Initial Bootloader flashing | `SWCLK`, `SWDIO`, `GND`, `3.3 V` | ST-Link V2 |
-| App flashing via IAP | `TX`, `RX`, `GND`, `3.3 V` | USB-to-TTL adapter, with TX/RX crossed |
+| Stage                       | Required pins                            | Interface                              |
+| --------------------------- | ---------------------------------------- | -------------------------------------- |
+| Initial Bootloader flashing | `SWCLK`, `SWDIO`, `GND`, `3.3 V` | ST-Link V2                             |
+| App flashing via IAP        | `TX`, `RX`, `GND`, `3.3 V`       | USB-to-TTL adapter, with TX/RX crossed |
 
 > [!WARNING]
 > Disconnect the high-voltage output load before beginning. Make the system safe.
@@ -264,14 +264,12 @@ The board communication header exposes `SWCLK`, `SWDIO`, `TX`, `RX`, `GND`, `3.3
 2. Open STM32 ST-LINK Utility, select the Bootloader HEX file, and program it.
 
    ![Programming the Bootloader with STM32 ST-LINK Utility](Docs/stlink-utility.png)
-
 3. Reset the board after programming. If `LED_A` lights, the Bootloader has started successfully.
 4. Disconnect the ST-Link. Connect the USB-to-TTL adapter to `TX`, `RX`, `GND`, and `3.3 V`; cross TX and RX.
 5. Open [`BootLoaderHostUI/index.html`](BootLoaderHostUI/index.html) from the downloaded project, or use the [online IAP flasher](https://azidopp.github.io/HVCCPS-V1.4/BootLoaderHostUI/). Use the latest Chrome or Edge.
 6. Connect the serial port in the page, select the App HEX file, click the flash button, and press the board's **RST** button.
 
    ![Flashing the App through the IAP page](Docs/iap-flashing.png)
-
 7. Wait for transfer and verification to finish. Reset the board again. If `LED_A` flashes continuously, the App has started successfully.
 
 ## 6. Host interfaces
@@ -345,8 +343,8 @@ Oscilloscope probe connections:
 
 The measurement focuses on the lower MOSFET of the lagging bridge leg, where ZVS is harder to achieve. When the lagging leg meets the ZVS condition, the leading leg will usually achieve ZVS as well.
 
-| ZVS waveform 1 | ZVS waveform 2 | ZVS waveform 3 |
-|---|---|---|
+| ZVS waveform 1                                 | ZVS waveform 2                                 | ZVS waveform 3                                 |
+| ---------------------------------------------- | ---------------------------------------------- | ---------------------------------------------- |
 | ![ZVS waveform 1](Test_Data/ZVS-waveform1.png) | ![ZVS waveform 2](Test_Data/ZVS-waveform2.png) | ![ZVS waveform 3](Test_Data/ZVS-waveform3.png) |
 
 The blue traces are the lagging-leg SW node, the red traces are the leading-leg SW node, and the yellow traces are the lower gate-drive signal of the lagging leg.
@@ -358,24 +356,24 @@ The blue traces are the lagging-leg SW node, the red traces are the leading-leg 
 
 #### Primary current
 
-| Waveform 1 | Waveform 2 |
-|---|---|
+| Waveform 1                                                             | Waveform 2                                                             |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | ![Primary-current waveform 1](Test_Data/50kHz/primary-current/_74.png) | ![Primary-current waveform 2](Test_Data/50kHz/primary-current/_78.png) |
 
 The blue traces are the lagging-leg SW node, the red traces are the leading-leg SW node, and the yellow traces are the voltage signal obtained after rectifying and sampling the current-transformer signal.
 
 #### Secondary current
 
-| Waveform 1 | Waveform 2 |
-|---|---|
+| Waveform 1                                                                 | Waveform 2                                                                 |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | ![Secondary-current waveform 1](Test_Data/50kHz/secondary-current/_67.png) | ![Secondary-current waveform 2](Test_Data/50kHz/secondary-current/_69.png) |
 
 The blue traces are the lagging-leg SW node, the red traces are the leading-leg SW node, and the yellow traces are the AMC1301 sampling signal fed back to the primary side after differential amplification.
 
 ### 7.3 Voltage waveforms
 
-| Secondary-voltage waveform 1 | Secondary-voltage waveform 2 |
-|---|---|
+| Secondary-voltage waveform 1                                                                        | Secondary-voltage waveform 2                                                                         |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | ![Secondary-voltage waveform 1](Test_Data/50kHz/voltage-feedback-with-1nf-input-filter/313V-60.png) | ![Secondary-voltage waveform 2](Test_Data/50kHz/voltage-feedback-with-1nf-input-filter/370V-100.png) |
 
 The blue traces are the lagging-leg SW node, the red traces are the leading-leg SW node, and the yellow traces are the AMC1311B sampling signal fed back to the primary side after differential amplification.
@@ -387,16 +385,16 @@ The blue traces are the lagging-leg SW node, the red traces are the leading-leg 
 
 The startup waveforms were measured with a 3 kΩ resistive load. Load current was approximately 50 mA at 150 V output and 77 mA at 230 V output. These tests show the output-voltage buildup during closed-loop startup.
 
-| 150 V / 50 mA | 230 V / 77 mA |
-|---|---|
+| 150 V / 50 mA                                         | 230 V / 77 mA                                         |
+| ----------------------------------------------------- | ----------------------------------------------------- |
 | ![150 V startup waveform](Test_Data/startup-150V.png) | ![230 V startup waveform](Test_Data/startup-230V.png) |
 
 ### 7.5 Output-voltage ripple
 
 Output-voltage ripple was also measured with a 3 kΩ resistive load. The images show the 150 V / 50 mA and 230 V / 77 mA operating points.
 
-| 150 V / 50 mA | 230 V / 77 mA |
-|---|---|
+| 150 V / 50 mA                                                     | 230 V / 77 mA                                                     |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------- |
 | ![150 V output-voltage ripple](Test_Data/voltage-ripple-150V.png) | ![230 V output-voltage ripple](Test_Data/voltage-ripple-230V.png) |
 
 > [!NOTE]
