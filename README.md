@@ -41,7 +41,7 @@ The PCB was designed in EasyEDA Pro. This repository includes the complete [Easy
 
 ### 1.2 Firmware and license
 
-To discourage unauthorized closed-source commercial use and closed-source copying, the public repository currently provides compiled firmware only; the firmware source is not included directly in the public branch. The source code is available **free of charge** by joining QQ group **582594264** or emailing **Lanyyontop@gmail.com**.
+If you have any problem with the source code, please join the QQ group **582594264** or contact the author by email **Lanyyontop@gmail.com**.
 
 The public contents of this repository are licensed under [GPL-3.0](LICENSE). When obtaining, modifying, or redistributing the source or derivative works, comply with the license terms.
 
